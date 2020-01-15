@@ -241,7 +241,14 @@ q_i &amp;\sim&amp; \mathrm{Beta}(1, 1)
 SlicedTree(9, 17, 7)
 
 julia&gt; w = WhaleChain(st, IRModel(st))
-WhaleChain{IRModel}(SlicedTree(9, 17, 7))</code></pre><p>To run the MCMC simulation, use the <code>mcmc!</code> function</p><pre><code class="language-julia-repl">julia&gt; chain = mcmc!(w, D, 100, show_every=10)</code></pre><p>The resulting <code>Chains</code> object is fairly intuitive, see the docs for <a href="https://github.com/TuringLang/MCMCChains.jl"><code>MCMCChains.jl</code></a>.</p><h3><a class="nav-anchor" id="Autocorrelated-rates-model-(Geometric-Brownian-motion)-1" href="#Autocorrelated-rates-model-(Geometric-Brownian-motion)-1">Autocorrelated rates model (Geometric Brownian motion)</a></h3><p>The default structure is as above but with</p><div>\[\begin{eqnarray}
+ERROR: MethodError: no method matching IRModel(::SlicedTree)
+Closest candidates are:
+  IRModel(::T, !Matched::U, !Matched::V, !Matched::W, !Matched::X) where {T, U, V, W, X} at /home/travis/.julia/packages/Parameters/l76EM/src/Parameters.jl:499
+  IRModel(; ν, η, λ, μ, q) at /home/travis/.julia/packages/Parameters/l76EM/src/Parameters.jl:518
+  IRModel(!Matched::IRModel; kws...) at /home/travis/.julia/packages/Parameters/l76EM/src/Parameters.jl:528
+  ...
+Stacktrace:
+ [1] top-level scope at none:0</code></pre><p>To run the MCMC simulation, use the <code>mcmc!</code> function</p><pre><code class="language-julia-repl">julia&gt; chain = mcmc!(w, D, 100, show_every=10)</code></pre><p>The resulting <code>Chains</code> object is fairly intuitive, see the docs for <a href="https://github.com/TuringLang/MCMCChains.jl"><code>MCMCChains.jl</code></a>.</p><h3><a class="nav-anchor" id="Autocorrelated-rates-model-(Geometric-Brownian-motion)-1" href="#Autocorrelated-rates-model-(Geometric-Brownian-motion)-1">Autocorrelated rates model (Geometric Brownian motion)</a></h3><p>The default structure is as above but with</p><div>\[\begin{eqnarray}
 \nu &amp;\sim&amp; \mathrm{Exponential} \\
 \eta &amp;\sim&amp; \mathrm{Beta} \\
 \lambda_0 &amp;\sim&amp; \mathrm{Exponential} \\
