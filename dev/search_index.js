@@ -297,6 +297,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api/#Whale.ConstantDistribution",
+    "page": "API",
+    "title": "Whale.ConstantDistribution",
+    "category": "type",
+    "text": "ConstantDistribution(x)\n\nA \'constant\' distribution (Dirac mass), sometimes useful.\n\n\n\n\n\n"
+},
+
+{
     "location": "api/#Whale.GeometricBrownianMotion",
     "page": "API",
     "title": "Whale.GeometricBrownianMotion",
