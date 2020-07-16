@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Bayesian inference using NUTS with DynamicHMC.jl · Whale.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>Whale.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Index</a></li><li><span class="toctext">Examples</span><ul><li class="current"><a class="toctext" href>Bayesian inference using NUTS with <code>DynamicHMC.jl</code></a><ul class="internal"></ul></li><li><a class="toctext" href="../wgd-turing/">Bayesian inference using <code>Turing.jl</code></a></li><li><a class="toctext" href="../cytp450/">Reconciled tree inference example</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Examples</li><li><a href>Bayesian inference using NUTS with <code>DynamicHMC.jl</code></a></li></ul><a class="edit-page" href="https://github.com/arzwa/Whale.jl/blob/master/docs/src/wgd-dhmc.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Bayesian inference using NUTS with DynamicHMC.jl</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Bayesian-inference-using-NUTS-with-DynamicHMC.jl-1" href="#Bayesian-inference-using-NUTS-with-DynamicHMC.jl-1">Bayesian inference using NUTS with <code>DynamicHMC.jl</code></a></h1><div><pre><code class="language-julia">using Whale, DynamicHMC, Random, NewickTree, Distributions, DataFrames
+using DynamicHMC.Diagnostics
+Random.seed!(562)</code></pre><pre><code class="language-none">Random.MersenneTwister(UInt32[0x00000232], Random.DSFMT.DSFMT_state(Int32[-1442225373, 1073154855, 1212143085, 1073097938, -1583118412, 1072900532, 1049692639, 1073222897, -247624831, 1073108386  …  -920194525, 1072748445, -1157828857, 1073152957, -215978644, -1986690580, -1219347653, -530126954, 382, 0]), [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], UInt128[0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000  …  0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000], 1002, 0)</code></pre></div><p>Set up the model and the data, here I use a model with constant duplication and loss rates across the species tree. Note that the tree contains two WGD events.</p><div><pre><code class="language-julia">tree  = readnw(&quot;((MPOL:4.752,(PPAT:2.752)wgd_1:2.0):0.292,(SMOE:4.457,((((OSAT:1.555,(ATHA:0.5548,CPAP:0.5548):1.0002):0.738,ATRI:2.293):1.0)wgd_2:0.225,(GBIL:3.178,PABI:3.178):0.34):0.939):0.587);&quot;)
+n = length(postwalk(tree))
+ntaxa = (n+1)÷2
+rates = RatesModel(ConstantDLWGD(λ=0.1, μ=0.1, q=[0.2, 0.3], η=0.9))
+model = WhaleModel(rates, tree, 0.1)
+data  = read_ale(joinpath(@__DIR__, &quot;../../example/example-1/ale&quot;), model, true)
+prior = Whale.CRPrior()
+problem = WhaleProblem(data, model, prior)</code></pre><pre><code class="language-none">┌ Warning: `sort(d::Dict; args...)` is deprecated, use `sort!(OrderedDict(d); args...)` instead.
+│   caller = addleafclades!(::Dict{Symbol,Any}) at ccd.jl:176
+└ @ Whale ~/build/arzwa/Whale.jl/src/ccd.jl:176
+WhaleProblem{Float64,RatesModel{Float64,ConstantDLWGD{Float64,Float64},TransformVariables.TransformTuple{NamedTuple{(:λ, :μ, :η, :q, :p),Tuple{TransformVariables.ShiftedExp{true,Float64},TransformVariables.ShiftedExp{true,Float64},TransformVariables.ScaledShiftedLogistic{Float64},TransformVariables.ArrayTransform{TransformVariables.ScaledShiftedLogistic{Float64},1},TransformVariables.ArrayTransform{TransformVariables.ScaledShiftedLogistic{Float64},1}}}}},CRPrior,UInt16}(CCD{UInt16,Float64}[CCD{UInt16,Float64}(Γ=83, 𝓛=13), CCD{UInt16,Float64}(Γ=55, 𝓛=13), CCD{UInt16,Float64}(Γ=89, 𝓛=13), CCD{UInt16,Float64}(Γ=131, 𝓛=13), CCD{UInt16,Float64}(Γ=107, 𝓛=13), CCD{UInt16,Float64}(Γ=59, 𝓛=13), CCD{UInt16,Float64}(Γ=53, 𝓛=13), CCD{UInt16,Float64}(Γ=83, 𝓛=13), CCD{UInt16,Float64}(Γ=59, 𝓛=13), CCD{UInt16,Float64}(Γ=95, 𝓛=13), CCD{UInt16,Float64}(Γ=67, 𝓛=13), CCD{UInt16,Float64}(Γ=65, 𝓛=13)], WhaleModel
+——————————
+⋅Parameterization:
+RatesModel with () fixed
+ConstantDLWGD{Float64,Float64}
+  λ: Float64 0.1
+  μ: Float64 0.1
+  q: Array{Float64}((2,)) [0.2, 0.3]
+  p: Array{Float64}((0,)) Float64[]
+  η: Float64 0.9
+
+⋅Condition:
+Whale.RootCondition
+
+⋅Model structure:
+19 nodes (9 leaves, 2 WGD nodes)
+node_id,wgd_id,distance,Δt,n,subtree
+1,0,4.752,0.099,48,&quot;MPOL;&quot;
+2,0,2.752,0.0983,28,&quot;PPAT;&quot;
+3,0,4.457,0.099,45,&quot;SMOE;&quot;
+4,0,1.555,0.0972,16,&quot;OSAT;&quot;
+5,0,0.5548,0.0925,6,&quot;ATHA;&quot;
+6,0,0.5548,0.0925,6,&quot;CPAP;&quot;
+7,0,2.293,0.0997,23,&quot;ATRI;&quot;
+8,0,3.178,0.0993,32,&quot;GBIL;&quot;
+9,0,3.178,0.0993,32,&quot;PABI;&quot;
+18,1,2.0,0.1,20,&quot;(PPAT);&quot;
+10,0,0.292,0.0584,5,&quot;(MPOL,(PPAT));&quot;
+11,0,1.0002,0.0909,11,&quot;(ATHA,CPAP);&quot;
+12,0,0.738,0.0922,8,&quot;(OSAT,(ATHA,CPAP));&quot;
+13,0,1.0,0.1,10,&quot;((OSAT,(ATHA,CPAP)),ATRI);&quot;
+19,2,0.225,0.045,5,&quot;(((OSAT,(ATHA,CPAP)),ATRI));&quot;
+14,0,0.34,0.068,5,&quot;(GBIL,PABI);&quot;
+15,0,0.939,0.0939,10,&quot;((((OSAT,(ATHA,CPAP)),ATRI)),(GBIL,PABI));&quot;
+16,0,0.587,0.0978,6,&quot;(SMOE,((((OSAT,(ATHA,CPAP)),ATRI)),(GBIL,PABI)));&quot;
+17,0,0.0,0.0,0,&quot;((MPOL,(PPAT)),(SMOE,((((OSAT,(ATHA,CPAP)),ATRI)),(GBIL,PABI))));&quot;
+, CRPrior
+  πr: Distributions.MvLogNormal{Float64,PDMats.PDiagMat{Float64,Array{Float64,1}},FillArrays.Zeros{Float64,1,Tuple{Base.OneTo{Int64}}}}
+  πq: Distributions.Beta{Float64}
+  πη: Distributions.Beta{Float64}
+)</code></pre></div><p>Run NUTS using <a href="https://github.com/tpapp/DynamicHMC.jl"><code>DynamicHMC</code></a>, (of course this is a ridicuously short run, and it&#39;s better to keep <code>doubling_stages</code> &gt;= 3)</p><div><pre><code class="language-julia">results = mcmc_with_warmup(Random.GLOBAL_RNG, problem, 100,
+    warmup_stages=DynamicHMC.default_warmup_stages(doubling_stages=2))
+summarize_tree_statistics(results.tree_statistics)</code></pre><pre><code class="language-none">Hamiltonian Monte Carlo sample of length 100
+  acceptance rate mean: 0.93, 5/25/50/75/95%: 0.72 0.9 0.97 1.0 1.0
+  termination: divergence =&gt; 0%, max_depth =&gt; 0%, turning =&gt; 100%
+  depth: 0 =&gt; 0%, 1 =&gt; 0%, 2 =&gt; 21%, 3 =&gt; 64%, 4 =&gt; 15%</code></pre></div><p>Obtain the posterior distribution</p><div><pre><code class="language-julia">posterior = Whale.transform(problem, results.chain)
+df = Whale.unpack(posterior)
+describe(df)</code></pre><table class="data-frame"><thead><tr><th></th><th>variable</th><th>mean</th><th>min</th><th>median</th><th>max</th><th>nunique</th><th>nmissing</th><th>eltype</th></tr><tr><th></th><th>Symbol</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Nothing</th><th>Nothing</th><th>DataType</th></tr></thead><tbody><p>5 rows × 8 columns</p><tr><th>1</th><td>λ</td><td>0.129104</td><td>0.0895347</td><td>0.130169</td><td>0.168363</td><td></td><td></td><td>Float64</td></tr><tr><th>2</th><td>μ</td><td>0.158208</td><td>0.0970174</td><td>0.156925</td><td>0.249654</td><td></td><td></td><td>Float64</td></tr><tr><th>3</th><td>η</td><td>0.739796</td><td>0.454379</td><td>0.735276</td><td>0.971606</td><td></td><td></td><td>Float64</td></tr><tr><th>4</th><td>q_1</td><td>0.383913</td><td>0.00533455</td><td>0.342384</td><td>0.973117</td><td></td><td></td><td>Float64</td></tr><tr><th>5</th><td>q_2</td><td>0.0877158</td><td>0.000688758</td><td>0.0552975</td><td>0.433446</td><td></td><td></td><td>Float64</td></tr></tbody></table></div><p>Obtain reconciled trees sampled from the posterior</p><div><pre><code class="language-julia">trees = track(problem, posterior)</code></pre><pre><code class="language-none">[ Info: Tracking OG0004512.fasta.nex.treesample.ale
+[ Info: Tracking OG0004518.fasta.nex.treesample.ale
+[ Info: Tracking OG0004524.fasta.nex.treesample.ale
+[ Info: Tracking OG0004533.fasta.nex.treesample.ale
+[ Info: Tracking OG0004539.fasta.nex.treesample.ale
+[ Info: Tracking OG0004540.fasta.nex.treesample.ale
+[ Info: Tracking OG0004544.fasta.nex.treesample.ale
+[ Info: Tracking OG0004546.fasta.nex.treesample.ale
+[ Info: Tracking OG0004548.fasta.nex.treesample.ale
+[ Info: Tracking OG0004558.fasta.nex.treesample.ale
+[ Info: Tracking OG0004585.fasta.nex.treesample.ale
+[ Info: Tracking OG0004590.fasta.nex.treesample.ale
+12-element DistributedArrays.DArray{Whale.RecSummary,1,Array{Whale.RecSummary,1}}:
+ RecSummary(# unique trees = 33)
+ RecSummary(# unique trees = 8)
+ RecSummary(# unique trees = 21)
+ RecSummary(# unique trees = 50)
+ RecSummary(# unique trees = 20)
+ RecSummary(# unique trees = 24)
+ RecSummary(# unique trees = 21)
+ RecSummary(# unique trees = 22)
+ RecSummary(# unique trees = 9)
+ RecSummary(# unique trees = 16)
+ RecSummary(# unique trees = 28)
+ RecSummary(# unique trees = 33)</code></pre></div><p>Consider the first gene family</p><div><pre><code class="language-julia">family1 = trees[1].trees</code></pre><pre><code class="language-none">33-element Array{NamedTuple,1}:
+ (freq = 0.34, tree = Node(39, 17, ))
+ (freq = 0.11, tree = Node(47, 17, ))
+ (freq = 0.07, tree = Node(41, 17, ))
+ (freq = 0.05, tree = Node(37, 17, ))
+ (freq = 0.04, tree = Node(39, 17, ))
+ (freq = 0.03, tree = Node(39, 17, ))
+ (freq = 0.03, tree = Node(41, 17, ))
+ (freq = 0.03, tree = Node(39, 17, ))
+ (freq = 0.02, tree = Node(37, 17, ))
+ (freq = 0.02, tree = Node(43, 17, ))
+ ⋮
+ (freq = 0.01, tree = Node(49, 17, ))
+ (freq = 0.01, tree = Node(49, 17, ))
+ (freq = 0.01, tree = Node(43, 17, ))
+ (freq = 0.01, tree = Node(37, 17, ))
+ (freq = 0.01, tree = Node(53, 17, ))
+ (freq = 0.01, tree = Node(37, 17, ))
+ (freq = 0.01, tree = Node(47, 17, ))
+ (freq = 0.01, tree = Node(41, 17, ))
+ (freq = 0.01, tree = Node(43, 17, ))</code></pre></div><p>get the MAP tree as a newick string</p><div><pre><code class="language-julia">nwstr(family1[1].tree)</code></pre><pre><code class="language-none">&quot;(((PPAT_Pp3c9_4950V3.1_Pp3c9_4950,loss_12884754745045318360)1.0,MPOL_Mapoly0036s0119.1_Mapoly0036s0119)0.75,(SMOE_SMO111G0185.1_SMO111G0185,(((PABI_PAB00009793.1_PAB00009793,loss_5213350904390397879)1.0,loss_2714834812330206676)1.0,((PABI_PAB00012681.1_PAB00012681,GBIL_Gb_13638)1.0,((ATRI_ATR0705G185.1_ATR0705G185,(((CPAP_Cpa.t.sc25.4_Cpa.g.sc25.4,loss_9281435945447309518)0.97,OSAT_LOC_Os07g08050.1_LOC_Os07g08050)0.93,(((CPAP_Cpa.t.sc25.3_Cpa.g.sc25.3,loss_13201382226463327163)0.68,(ATHA_AT5G48120.1_AT5G48120,(CPAP_Cpa.t.sc25.8_Cpa.g.sc25.8,CPAP_Cpa.t.sc25.5_Cpa.g.sc25.5)0.57)0.53)0.64,loss_4137746180435632500)0.87)0.93)1.0,loss_16051896108791359437)1.0)1.0)0.94)0.76)0.74;&quot;</code></pre></div><p>The support values are posterior probabilities for the associated reconciled split. Note that the tree does not contain branch lengths.</p><p>The events field for each gene family contains a summary of the expected number of events for each branch</p><div><pre><code class="language-julia">trees[1].events</code></pre><table class="data-frame"><thead><tr><th></th><th>duplication</th><th>loss</th><th>speciation</th><th>sploss</th><th>wgd</th><th>wgdloss</th><th>node</th></tr><tr><th></th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>String</th></tr></thead><tbody><p>19 rows × 7 columns</p><tr><th>1</th><td>0.0</td><td>0.25</td><td>1.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>MPOL</td></tr><tr><th>2</th><td>0.0</td><td>1.0</td><td>1.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>PPAT</td></tr><tr><th>3</th><td>0.0</td><td>0.3</td><td>1.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>SMOE</td></tr><tr><th>4</th><td>0.0</td><td>1.02</td><td>1.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>OSAT</td></tr><tr><th>5</th><td>0.0</td><td>2.05</td><td>1.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>ATHA</td></tr><tr><th>6</th><td>0.95</td><td>0.0</td><td>4.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>CPAP</td></tr><tr><th>7</th><td>0.0</td><td>0.0</td><td>1.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>ATRI</td></tr><tr><th>8</th><td>0.0</td><td>1.0</td><td>1.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>GBIL</td></tr><tr><th>9</th><td>0.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>PABI</td></tr><tr><th>10</th><td>0.01</td><td>0.04</td><td>0.75</td><td>0.5</td><td>0.0</td><td>0.0</td><td>MPOL,PPAT</td></tr><tr><th>11</th><td>1.03</td><td>0.0</td><td>1.0</td><td>2.05</td><td>0.0</td><td>0.0</td><td>ATHA,CPAP</td></tr><tr><th>12</th><td>1.02</td><td>0.0</td><td>1.0</td><td>1.02</td><td>0.0</td><td>0.0</td><td>OSAT,ATHA</td></tr><tr><th>13</th><td>0.0</td><td>1.0</td><td>1.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>OSAT,ATRI</td></tr><tr><th>14</th><td>0.0</td><td>0.0</td><td>1.0</td><td>1.0</td><td>0.0</td><td>0.0</td><td>GBIL,PABI</td></tr><tr><th>15</th><td>0.94</td><td>0.24</td><td>1.0</td><td>1.0</td><td>0.0</td><td>0.0</td><td>OSAT,GBIL</td></tr><tr><th>16</th><td>0.05</td><td>0.03</td><td>0.76</td><td>0.54</td><td>0.0</td><td>0.0</td><td>SMOE,OSAT</td></tr><tr><th>17</th><td>0.28</td><td>0.0</td><td>1.21</td><td>0.07</td><td>0.0</td><td>0.0</td><td>MPOL,SMOE</td></tr><tr><th>18</th><td>0.0</td><td>0.25</td><td>0.0</td><td>0.0</td><td>0.0</td><td>1.0</td><td>wgd_1</td></tr><tr><th>19</th><td>0.0</td><td>1.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>1.0</td><td>wgd_2</td></tr></tbody></table></div><p>We can get for every gene pair the posterior reconciliation probability</p><div><pre><code class="language-julia">pair_pps = Whale.getpairs(trees, model)
+first(pair_pps, 5)</code></pre><table class="data-frame"><thead><tr><th></th><th>11_duplication</th><th>8_duplication</th><th>16_speciation</th><th>13_speciation</th><th>12_duplication</th><th>10_speciation</th><th>6_duplication</th><th>5_duplication</th><th>3_speciation</th><th>18_duplication</th><th>16_duplication</th><th>14_speciation</th><th>9_speciation</th><th>10_duplication</th><th>11_speciation</th><th>4_duplication</th><th>9_duplication</th><th>5_speciation</th><th>7_speciation</th><th>12_speciation</th><th>15_duplication</th><th>15_speciation</th><th>2_duplication</th><th>7_duplication</th><th>3_duplication</th><th>18_wgdloss</th><th>1_speciation</th><th>18_wgd</th><th>6_speciation</th><th>13_duplication</th><th>8_speciation</th><th>2_speciation</th><th>19_duplication</th><th>19_wgdloss</th><th>1_duplication</th><th>19_wgd</th><th>14_duplication</th><th>17_duplication</th><th>17_speciation</th><th>4_speciation</th><th>family</th><th>pair</th></tr><tr><th></th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>String</th><th>String</th></tr></thead><tbody><p>5 rows × 42 columns</p><tr><th>1</th><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.75</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.01</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.24</td><td>0.0</td><td>0.0</td><td>OG0004512.fasta.nex.treesample.ale</td><td>MPOL_Mapoly0036s0119.1_Mapoly0036s0119__PPAT_Pp3c9_4950V3.1_Pp3c9_4950</td></tr><tr><th>2</th><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.25</td><td>0.75</td><td>0.0</td><td>OG0004512.fasta.nex.treesample.ale</td><td>PPAT_Pp3c9_4950V3.1_Pp3c9_4950__SMOE_SMO111G0185.1_SMO111G0185</td></tr><tr><th>3</th><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.02</td><td>0.98</td><td>0.0</td><td>OG0004512.fasta.nex.treesample.ale</td><td>MPOL_Mapoly0036s0119.1_Mapoly0036s0119__SMOE_SMO111G0185.1_SMO111G0185</td></tr><tr><th>4</th><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.03</td><td>0.97</td><td>0.0</td><td>OG0004512.fasta.nex.treesample.ale</td><td>PABI_PAB00009793.1_PAB00009793__PPAT_Pp3c9_4950V3.1_Pp3c9_4950</td></tr><tr><th>5</th><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.23</td><td>0.77</td><td>0.0</td><td>OG0004512.fasta.nex.treesample.ale</td><td>MPOL_Mapoly0036s0119.1_Mapoly0036s0119__PABI_PAB00009793.1_PAB00009793</td></tr></tbody></table></div><p>which sum to one, as we can verify</p><div><pre><code class="language-julia">map(sum, eachrow(pair_pps[!,1:end-2]))</code></pre><pre><code class="language-none">936-element Array{Float64,1}:
+ 1.0
+ 1.0
+ 1.0
+ 1.0
+ 1.0
+ 1.0
+ 1.0
+ 1.0
+ 1.0
+ 1.0
+ ⋮
+ 1.0
+ 1.0
+ 1.0
+ 1.0
+ 1.0
+ 1.0
+ 1.0
+ 1.0
+ 1.0</code></pre></div><p>Take for instance the following gene pair (second row)</p><div><pre><code class="language-julia">x = pair_pps[2,:]
+for (n, v) in zip(names(x), Array(x))
+    (!(typeof(v)&lt;:Number) || v &gt; 0.) &amp;&amp; println(n, &quot;: &quot;, v)
+end</code></pre><pre><code class="language-none">17_duplication: 0.25
+17_speciation: 0.75
+family: OG0004512.fasta.nex.treesample.ale
+pair: PPAT_Pp3c9_4950V3.1_Pp3c9_4950__SMOE_SMO111G0185.1_SMO111G0185</code></pre></div><p>The posterior probability (under the DL model) that this gene pair traces back to the speciation corresponding to node 17 (i.e. the root) is approximately 0.86, whereas the posterior probability that this gene pair traces back to an acnestral duplication event is 0.14.</p><p>We can get a WGD-centric view as well. The following retrieves a table for each WGD with all gene tree nodes that have a non-zero psoterior probability of being reconciled to that particular WGD node</p><div><pre><code class="language-julia">tables = Whale.getwgdtables(trees, data, model)
+tables[1]</code></pre><pre><code class="language-none">&quot;wgd_1&quot; =&gt; 12×7 DataFrame. Omitted printing of 2 columns
+│ Row │ family │ frequency │ clade  │ left   │ right  │
+│     │ Int64  │ Float64   │ UInt16 │ UInt16 │ UInt16 │
+├─────┼────────┼───────────┼────────┼────────┼────────┤
+│ 1   │ 4      │ 0.35      │ 0x0011 │ 0x000b │ 0x000c │
+│ 2   │ 4      │ 0.03      │ 0x001f │ 0x0009 │ 0x0016 │
+│ 3   │ 4      │ 0.27      │ 0x001f │ 0x0008 │ 0x000e │
+│ 4   │ 4      │ 0.08      │ 0x0035 │ 0x001f │ 0x0011 │
+│ 5   │ 4      │ 0.01      │ 0x0016 │ 0x0008 │ 0x000a │
+│ 6   │ 4      │ 0.06      │ 0x000e │ 0x0009 │ 0x000a │
+│ 7   │ 4      │ 0.02      │ 0x001f │ 0x000a │ 0x0017 │
+│ 8   │ 7      │ 0.14      │ 0x0010 │ 0x000b │ 0x000c │
+│ 9   │ 7      │ 0.37      │ 0x0014 │ 0x000d │ 0x0010 │
+│ 10  │ 9      │ 0.41      │ 0x0013 │ 0x0002 │ 0x000e │
+│ 11  │ 9      │ 0.11      │ 0x000e │ 0x000a │ 0x000b │
+│ 12  │ 11     │ 0.37      │ 0x0010 │ 0x000b │ 0x000c │</code></pre></div><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../"><span class="direction">Previous</span><span class="title">Index</span></a><a class="next" href="../wgd-turing/"><span class="direction">Next</span><span class="title">Bayesian inference using <code>Turing.jl</code></span></a></footer></article></body></html>
