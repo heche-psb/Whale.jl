@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Bayesian inference using Turing.jl · Whale.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>Whale.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Index</a></li><li><span class="toctext">Examples</span><ul><li><a class="toctext" href="../wgd-dhmc/">Bayesian inference using NUTS with <code>DynamicHMC.jl</code></a></li><li class="current"><a class="toctext" href>Bayesian inference using <code>Turing.jl</code></a><ul class="internal"><li><a class="toctext" href="#Using-a-constant-rates-model-1">Using a constant-rates model</a></li><li><a class="toctext" href="#Using-a-branch-specific-rates-model-1">Using a branch-specific rates model</a></li></ul></li><li><a class="toctext" href="../cytp450/">Reconciled tree inference example</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Examples</li><li><a href>Bayesian inference using <code>Turing.jl</code></a></li></ul><a class="edit-page" href="https://github.com/arzwa/Whale.jl/blob/master/docs/src/wgd-turing.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Bayesian inference using Turing.jl</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Bayesian-inference-using-Turing.jl-1" href="#Bayesian-inference-using-Turing.jl-1">Bayesian inference using <code>Turing.jl</code></a></h1><div><pre><code class="language-julia">using Whale, NewickTree, Distributions, Turing, DataFrames, LinearAlgebra</code></pre></div><h2><a class="nav-anchor" id="Using-a-constant-rates-model-1" href="#Using-a-constant-rates-model-1">Using a constant-rates model</a></h2><p>Get the tree</p><div><pre><code class="language-julia">t = deepcopy(Whale.extree)
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Bayesian inference using Turing.jl · Whale.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>Whale.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Index</a></li><li><span class="toctext">Examples</span><ul><li><a class="toctext" href="../wgd-dhmc/">Bayesian inference using NUTS with <code>DynamicHMC.jl</code></a></li><li class="current"><a class="toctext" href>Bayesian inference using <code>Turing.jl</code></a><ul class="internal"><li><a class="toctext" href="#Using-a-constant-rates-model-1">Using a constant-rates model</a></li><li><a class="toctext" href="#Using-a-branch-specific-rates-model-1">Using a branch-specific rates model</a></li></ul></li><li><a class="toctext" href="../cytp450/">Reconciled tree inference example</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Examples</li><li><a href>Bayesian inference using <code>Turing.jl</code></a></li></ul><a class="edit-page" href="https://github.com/arzwa/Whale.jl/blob/master/docs/src/wgd-turing.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Bayesian inference using Turing.jl</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Bayesian-inference-using-Turing.jl-1" href="#Bayesian-inference-using-Turing.jl-1">Bayesian inference using <code>Turing.jl</code></a></h1><p>In this example we will use the probabilistic programming language implemented in <a href="https://turing.ml/dev/"><code>Turing.jl</code></a> with Whale to specify Bayesian hierarchical models for gene tree reconciliation in a flexible way</p><div><pre><code class="language-julia">using Whale, NewickTree, Distributions, Turing, DataFrames, LinearAlgebra, Random
+Random.seed!(7137);</code></pre></div><h2><a class="nav-anchor" id="Using-a-constant-rates-model-1" href="#Using-a-constant-rates-model-1">Using a constant-rates model</a></h2><p>First we will do inference for a simple constant-rates model (i.e. assuming a single duplication and loss rate for the entire species tree). First we load the species tree (using the example tree available in the WHale library)</p><div><pre><code class="language-julia">t = deepcopy(Whale.extree)
 n = length(postwalk(t))  # number of internal nodes</code></pre><pre><code class="language-none">17</code></pre></div><p>Now we add two WGD nodes to the tree. We do this by specifying the last common ancestor node for the lineages that share the hypothetical WGD. By default, the added node is halfway between the specified node and its parent.</p><div><pre><code class="language-julia">insertnode!(getlca(t, &quot;PPAT&quot;, &quot;PPAT&quot;), name=&quot;wgd_1&quot;)
-insertnode!(getlca(t, &quot;ATHA&quot;, &quot;ATRI&quot;), name=&quot;wgd_2&quot;)</code></pre><pre><code class="language-none">0.6125</code></pre></div><p>and we obtain a reference model object, here we will use a constant-rates model</p><div><pre><code class="language-julia">θ = ConstantDLWGD(λ=0.1, μ=0.2, q=[0.2, 0.1], η=0.9)
+insertnode!(getlca(t, &quot;ATHA&quot;, &quot;ATRI&quot;), name=&quot;wgd_2&quot;)</code></pre><pre><code class="language-none">0.6125</code></pre></div><p>and we obtain a reference model object, using the constant-rates model with two WGDs</p><div><pre><code class="language-julia">θ = ConstantDLWGD(λ=0.1, μ=0.2, q=[0.2, 0.1], η=0.9)
 r = Whale.RatesModel(θ, fixed=(:p,))
 w = WhaleModel(r, t, .1)</code></pre><pre><code class="language-none">WhaleModel
 ——————————
@@ -54,115 +55,124 @@ node_id,wgd_id,distance,Δt,n,subtree
  CCD{UInt16,Float64}(Γ=95, 𝓛=13)
  CCD{UInt16,Float64}(Γ=67, 𝓛=13)
  CCD{UInt16,Float64}(Γ=65, 𝓛=13)</code></pre></div><p>Now we define the Turing model</p><div><pre><code class="language-julia">@model constantrates(model, ccd) = begin
-    r  ~ MvLogNormal(ones(2))
-    η  ~ Beta(3,1)
-    q1 ~ Beta()
-    q2 ~ Beta()
+    r  ~ MvLogNormal(ones(2))  # prior on the duplication and loss rate
+    η  ~ Beta(3,1)  # hyperprior for the parameter of the geometric prior distribution on the number of genes at the root of the species tree
+    q1 ~ Beta()  # prior for the WGD retention rate of `wgd_1`
+    q2 ~ Beta()  # prior for the WGD retention rate of `wgd_2`
     ccd ~ model((λ=r[1], μ=r[2], η=η, q=[q1, q2]))
 end
 
 model = constantrates(w, ccd)
 chain = sample(model, NUTS(0.65), 100)</code></pre><pre><code class="language-none">┌ Info: Found initial step size
-└   ϵ = 0.05
+└   ϵ = 0.2
 Sampling   0%|                                          |  ETA: N/A
-Sampling   1%|▍                                         |  ETA: 0:03:31
 ┌ Warning: The current proposal will be rejected due to numerical error(s).
 │   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
 └ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/P9wqk/src/hamiltonian.jl:47
-Sampling   2%|▉                                         |  ETA: 0:02:24
-Sampling   3%|█▎                                        |  ETA: 0:01:35
-Sampling   4%|█▋                                        |  ETA: 0:01:12
-Sampling   5%|██▏                                       |  ETA: 0:00:57
-Sampling   6%|██▌                                       |  ETA: 0:00:51
-Sampling   7%|███                                       |  ETA: 0:00:48
-Sampling   8%|███▍                                      |  ETA: 0:00:44
-Sampling   9%|███▊                                      |  ETA: 0:00:38
-Sampling  10%|████▎                                     |  ETA: 0:00:38
-Sampling  11%|████▋                                     |  ETA: 0:00:35
-Sampling  12%|█████                                     |  ETA: 0:00:35
-Sampling  13%|█████▌                                    |  ETA: 0:00:34
-Sampling  14%|█████▉                                    |  ETA: 0:00:32
-Sampling  15%|██████▎                                   |  ETA: 0:00:33
-Sampling  16%|██████▊                                   |  ETA: 0:00:31
-Sampling  17%|███████▏                                  |  ETA: 0:00:29
-Sampling  18%|███████▌                                  |  ETA: 0:00:29
-Sampling  19%|████████                                  |  ETA: 0:00:27
-Sampling  20%|████████▍                                 |  ETA: 0:00:26
-Sampling  21%|████████▉                                 |  ETA: 0:00:24
-Sampling  22%|█████████▎                                |  ETA: 0:00:23
-Sampling  23%|█████████▋                                |  ETA: 0:00:22
-Sampling  24%|██████████▏                               |  ETA: 0:00:21
-Sampling  25%|██████████▌                               |  ETA: 0:00:21
-Sampling  26%|██████████▉                               |  ETA: 0:00:20
-Sampling  27%|███████████▍                              |  ETA: 0:00:19
-Sampling  28%|███████████▊                              |  ETA: 0:00:19
-Sampling  29%|████████████▏                             |  ETA: 0:00:18
-Sampling  30%|████████████▋                             |  ETA: 0:00:18
-Sampling  31%|█████████████                             |  ETA: 0:00:17
-Sampling  32%|█████████████▌                            |  ETA: 0:00:17
-Sampling  33%|█████████████▉                            |  ETA: 0:00:16
-Sampling  34%|██████████████▎                           |  ETA: 0:00:16
-Sampling  35%|██████████████▊                           |  ETA: 0:00:15
-Sampling  36%|███████████████▏                          |  ETA: 0:00:15
+Sampling   1%|▍                                         |  ETA: 0:04:53
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/P9wqk/src/hamiltonian.jl:47
+Sampling   2%|▉                                         |  ETA: 0:02:32
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/P9wqk/src/hamiltonian.jl:47
+Sampling   3%|█▎                                        |  ETA: 0:01:41
+Sampling   4%|█▋                                        |  ETA: 0:01:16
+Sampling   5%|██▏                                       |  ETA: 0:01:01
+Sampling   6%|██▌                                       |  ETA: 0:00:52
+Sampling   7%|███                                       |  ETA: 0:00:44
+Sampling   8%|███▍                                      |  ETA: 0:00:40
+Sampling   9%|███▊                                      |  ETA: 0:00:35
+Sampling  10%|████▎                                     |  ETA: 0:00:36
+Sampling  11%|████▋                                     |  ETA: 0:00:33
+Sampling  12%|█████                                     |  ETA: 0:00:31
+Sampling  13%|█████▌                                    |  ETA: 0:00:28
+Sampling  14%|█████▉                                    |  ETA: 0:00:26
+Sampling  15%|██████▎                                   |  ETA: 0:00:26
+Sampling  16%|██████▊                                   |  ETA: 0:00:25
+Sampling  17%|███████▏                                  |  ETA: 0:00:24
+Sampling  18%|███████▌                                  |  ETA: 0:00:23
+Sampling  19%|████████                                  |  ETA: 0:00:22
+Sampling  20%|████████▍                                 |  ETA: 0:00:21
+Sampling  21%|████████▉                                 |  ETA: 0:00:22
+Sampling  22%|█████████▎                                |  ETA: 0:00:21
+Sampling  23%|█████████▋                                |  ETA: 0:00:20
+Sampling  24%|██████████▏                               |  ETA: 0:00:19
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/P9wqk/src/hamiltonian.jl:47
+Sampling  25%|██████████▌                               |  ETA: 0:00:18
+Sampling  26%|██████████▉                               |  ETA: 0:00:18
+Sampling  27%|███████████▍                              |  ETA: 0:00:18
+Sampling  28%|███████████▊                              |  ETA: 0:00:17
+Sampling  29%|████████████▏                             |  ETA: 0:00:16
+Sampling  30%|████████████▋                             |  ETA: 0:00:17
+Sampling  31%|█████████████                             |  ETA: 0:00:16
+Sampling  32%|█████████████▌                            |  ETA: 0:00:16
+Sampling  33%|█████████████▉                            |  ETA: 0:00:15
+Sampling  34%|██████████████▎                           |  ETA: 0:00:15
+Sampling  35%|██████████████▊                           |  ETA: 0:00:14
+Sampling  36%|███████████████▏                          |  ETA: 0:00:14
 Sampling  37%|███████████████▌                          |  ETA: 0:00:14
 Sampling  38%|████████████████                          |  ETA: 0:00:14
+Sampling  39%|████████████████▍                         |  ETA: 0:00:14
+Sampling  40%|████████████████▊                         |  ETA: 0:00:13
+Sampling  41%|█████████████████▎                        |  ETA: 0:00:14
+Sampling  42%|█████████████████▋                        |  ETA: 0:00:13
+Sampling  43%|██████████████████                        |  ETA: 0:00:13
+Sampling  44%|██████████████████▌                       |  ETA: 0:00:13
+Sampling  45%|██████████████████▉                       |  ETA: 0:00:12
+Sampling  46%|███████████████████▍                      |  ETA: 0:00:12
+Sampling  47%|███████████████████▊                      |  ETA: 0:00:12
 ┌ Warning: The current proposal will be rejected due to numerical error(s).
 │   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
 └ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/P9wqk/src/hamiltonian.jl:47
-Sampling  39%|████████████████▍                         |  ETA: 0:00:13
-Sampling  40%|████████████████▊                         |  ETA: 0:00:13
-Sampling  41%|█████████████████▎                        |  ETA: 0:00:13
-Sampling  42%|█████████████████▋                        |  ETA: 0:00:12
-Sampling  43%|██████████████████                        |  ETA: 0:00:12
-Sampling  44%|██████████████████▌                       |  ETA: 0:00:11
-Sampling  45%|██████████████████▉                       |  ETA: 0:00:11
-Sampling  46%|███████████████████▍                      |  ETA: 0:00:11
-Sampling  47%|███████████████████▊                      |  ETA: 0:00:10
-Sampling  48%|████████████████████▏                     |  ETA: 0:00:10
-Sampling  49%|████████████████████▋                     |  ETA: 0:00:10
-Sampling  50%|█████████████████████                     |  ETA: 0:00:10
-Sampling  51%|█████████████████████▍                    |  ETA: 0:00:10
-Sampling  52%|█████████████████████▉                    |  ETA: 0:00:09
-Sampling  53%|██████████████████████▎                   |  ETA: 0:00:09
-Sampling  54%|██████████████████████▋                   |  ETA: 0:00:09
-Sampling  55%|███████████████████████▏                  |  ETA: 0:00:09
-Sampling  56%|███████████████████████▌                  |  ETA: 0:00:08
-Sampling  57%|████████████████████████                  |  ETA: 0:00:08
-Sampling  58%|████████████████████████▍                 |  ETA: 0:00:08
-Sampling  59%|████████████████████████▊                 |  ETA: 0:00:08
-Sampling  60%|█████████████████████████▎                |  ETA: 0:00:08
-Sampling  61%|█████████████████████████▋                |  ETA: 0:00:07
-Sampling  62%|██████████████████████████                |  ETA: 0:00:07
-Sampling  63%|██████████████████████████▌               |  ETA: 0:00:07
-Sampling  64%|██████████████████████████▉               |  ETA: 0:00:07
-Sampling  65%|███████████████████████████▎              |  ETA: 0:00:06
-Sampling  66%|███████████████████████████▊              |  ETA: 0:00:06
-Sampling  67%|████████████████████████████▏             |  ETA: 0:00:06
-Sampling  68%|████████████████████████████▌             |  ETA: 0:00:06
-Sampling  69%|█████████████████████████████             |  ETA: 0:00:06
-Sampling  70%|█████████████████████████████▍            |  ETA: 0:00:05
-Sampling  71%|█████████████████████████████▉            |  ETA: 0:00:05
-Sampling  72%|██████████████████████████████▎           |  ETA: 0:00:05
-Sampling  73%|██████████████████████████████▋           |  ETA: 0:00:05
+Sampling  48%|████████████████████▏                     |  ETA: 0:00:11
+Sampling  49%|████████████████████▋                     |  ETA: 0:00:11
+Sampling  50%|█████████████████████                     |  ETA: 0:00:11
+Sampling  51%|█████████████████████▍                    |  ETA: 0:00:11
+Sampling  52%|█████████████████████▉                    |  ETA: 0:00:11
+Sampling  53%|██████████████████████▎                   |  ETA: 0:00:10
+Sampling  54%|██████████████████████▋                   |  ETA: 0:00:10
+Sampling  55%|███████████████████████▏                  |  ETA: 0:00:10
+Sampling  56%|███████████████████████▌                  |  ETA: 0:00:10
+Sampling  57%|████████████████████████                  |  ETA: 0:00:09
+Sampling  58%|████████████████████████▍                 |  ETA: 0:00:09
+Sampling  59%|████████████████████████▊                 |  ETA: 0:00:09
+Sampling  60%|█████████████████████████▎                |  ETA: 0:00:09
+Sampling  61%|█████████████████████████▋                |  ETA: 0:00:08
+Sampling  62%|██████████████████████████                |  ETA: 0:00:08
+Sampling  63%|██████████████████████████▌               |  ETA: 0:00:08
+Sampling  64%|██████████████████████████▉               |  ETA: 0:00:08
+Sampling  65%|███████████████████████████▎              |  ETA: 0:00:08
+Sampling  66%|███████████████████████████▊              |  ETA: 0:00:07
+Sampling  67%|████████████████████████████▏             |  ETA: 0:00:07
+Sampling  68%|████████████████████████████▌             |  ETA: 0:00:07
+Sampling  69%|█████████████████████████████             |  ETA: 0:00:07
+Sampling  70%|█████████████████████████████▍            |  ETA: 0:00:06
+Sampling  71%|█████████████████████████████▉            |  ETA: 0:00:06
+Sampling  72%|██████████████████████████████▎           |  ETA: 0:00:06
+Sampling  73%|██████████████████████████████▋           |  ETA: 0:00:06
 Sampling  74%|███████████████████████████████▏          |  ETA: 0:00:05
-Sampling  75%|███████████████████████████████▌          |  ETA: 0:00:04
-Sampling  76%|███████████████████████████████▉          |  ETA: 0:00:04
-Sampling  77%|████████████████████████████████▍         |  ETA: 0:00:04
-Sampling  78%|████████████████████████████████▊         |  ETA: 0:00:04
+Sampling  75%|███████████████████████████████▌          |  ETA: 0:00:05
+Sampling  76%|███████████████████████████████▉          |  ETA: 0:00:05
+Sampling  77%|████████████████████████████████▍         |  ETA: 0:00:05
+Sampling  78%|████████████████████████████████▊         |  ETA: 0:00:05
 Sampling  79%|█████████████████████████████████▏        |  ETA: 0:00:04
-Sampling  80%|█████████████████████████████████▋        |  ETA: 0:00:03
-Sampling  81%|██████████████████████████████████        |  ETA: 0:00:03
-Sampling  82%|██████████████████████████████████▌       |  ETA: 0:00:03
-Sampling  83%|██████████████████████████████████▉       |  ETA: 0:00:03
+Sampling  80%|█████████████████████████████████▋        |  ETA: 0:00:04
+Sampling  81%|██████████████████████████████████        |  ETA: 0:00:04
+Sampling  82%|██████████████████████████████████▌       |  ETA: 0:00:04
+Sampling  83%|██████████████████████████████████▉       |  ETA: 0:00:04
 Sampling  84%|███████████████████████████████████▎      |  ETA: 0:00:03
 Sampling  85%|███████████████████████████████████▊      |  ETA: 0:00:03
-Sampling  86%|████████████████████████████████████▏     |  ETA: 0:00:02
-Sampling  87%|████████████████████████████████████▌     |  ETA: 0:00:02
-Sampling  88%|█████████████████████████████████████     |  ETA: 0:00:02
+Sampling  86%|████████████████████████████████████▏     |  ETA: 0:00:03
+Sampling  87%|████████████████████████████████████▌     |  ETA: 0:00:03
+Sampling  88%|█████████████████████████████████████     |  ETA: 0:00:03
 Sampling  89%|█████████████████████████████████████▍    |  ETA: 0:00:02
 Sampling  90%|█████████████████████████████████████▊    |  ETA: 0:00:02
 Sampling  91%|██████████████████████████████████████▎   |  ETA: 0:00:02
-Sampling  92%|██████████████████████████████████████▋   |  ETA: 0:00:01
+Sampling  92%|██████████████████████████████████████▋   |  ETA: 0:00:02
 Sampling  93%|███████████████████████████████████████   |  ETA: 0:00:01
 Sampling  94%|███████████████████████████████████████▌  |  ETA: 0:00:01
 Sampling  95%|███████████████████████████████████████▉  |  ETA: 0:00:01
@@ -170,8 +180,8 @@ Sampling  96%|██████████████████████
 Sampling  97%|████████████████████████████████████████▊ |  ETA: 0:00:01
 Sampling  98%|█████████████████████████████████████████▏|  ETA: 0:00:00
 Sampling  99%|█████████████████████████████████████████▋|  ETA: 0:00:00
-Sampling 100%|██████████████████████████████████████████| Time: 0:00:16
-Sampling 100%|██████████████████████████████████████████| Time: 0:00:17
+Sampling 100%|██████████████████████████████████████████| Time: 0:00:20
+Sampling 100%|██████████████████████████████████████████| Time: 0:00:20
 Object of type Chains, with data of type 50×17×1 Array{Float64,3}
 
 Iterations        = 1:50
@@ -184,22 +194,22 @@ parameters        = q1, q2, r[1], r[2], η
 2-element Array{MCMCChains.ChainDataFrame,1}
 
 Summary Statistics
-  parameters    mean     std  naive_se     mcse       ess   r_hat
-  ──────────  ──────  ──────  ────────  ───────  ────────  ──────
-          q1  0.3426  0.2278    0.0322  missing   46.3107  1.0032
-          q2  0.0581  0.0507    0.0072  missing   57.4465  0.9894
-        r[1]  0.1378  0.0258    0.0036  missing   50.2449  0.9883
-        r[2]  0.1679  0.0309    0.0044  missing   61.2993  0.9854
-           η  0.7849  0.0787    0.0111  missing  473.0011  0.9859
+  parameters    mean     std  naive_se     mcse      ess   r_hat
+  ──────────  ──────  ──────  ────────  ───────  ───────  ──────
+          q1  0.3437  0.3502    0.0495  missing  13.1498  1.0141
+          q2  0.0928  0.0865    0.0122  missing  27.9136  0.9811
+        r[1]  0.1374  0.0218    0.0031  missing  61.2719  0.9944
+        r[2]  0.1740  0.0316    0.0045  missing  84.1094  0.9807
+           η  0.7777  0.1057    0.0149  missing  46.1359  1.0303
 
 Quantiles
   parameters    2.5%   25.0%   50.0%   75.0%   97.5%
   ──────────  ──────  ──────  ──────  ──────  ──────
-          q1  0.0418  0.1569  0.3132  0.4890  0.8013
-          q2  0.0063  0.0165  0.0368  0.0938  0.1453
-        r[1]  0.0994  0.1180  0.1375  0.1565  0.1856
-        r[2]  0.1278  0.1488  0.1604  0.1845  0.2522
-           η  0.6293  0.7369  0.7893  0.8413  0.9082</code></pre></div><div class="admonition warning"><div class="admonition-title">Warning</div><div class="admonition-text"><p>Of course such a chain should be run much longer than in this example! Here a very short chain is presented to ensure reasonable build times for this documentation.</p></div></div><h2><a class="nav-anchor" id="Using-a-branch-specific-rates-model-1" href="#Using-a-branch-specific-rates-model-1">Using a branch-specific rates model</a></h2><p>We&#39;ll use the same tree as above. The relevant model now is the DLWGD model:</p><div><pre><code class="language-julia">params = DLWGD(λ=randn(n), μ=randn(n), q=rand(2), η=rand())
+          q1  0.0233  0.0628  0.1580  0.6676  0.9974
+          q2  0.0044  0.0231  0.0551  0.1603  0.2545
+        r[1]  0.1070  0.1207  0.1350  0.1504  0.1865
+        r[2]  0.1256  0.1555  0.1771  0.1862  0.2355
+           η  0.5728  0.7150  0.7694  0.8650  0.9328</code></pre></div><div class="admonition warning"><div class="admonition-title">Warning</div><div class="admonition-text"><p>Of course such a chain should be run much longer than in this example! Here a very short chain is presented to ensure reasonable build times for this documentation.</p></div></div><h2><a class="nav-anchor" id="Using-a-branch-specific-rates-model-1" href="#Using-a-branch-specific-rates-model-1">Using a branch-specific rates model</a></h2><p>Now we will consider a model with branch-specific duplication and loss rates, using a more complicated hierarchical model with an bivariate uncorrelated relaxed clock prior. We&#39;ll use the same tree as above. The relevant model now is the DLWGD model:</p><div><pre><code class="language-julia">params = DLWGD(λ=randn(n), μ=randn(n), q=rand(2), η=rand())
 r = Whale.RatesModel(params, fixed=(:p,))
 w = WhaleModel(r, t, 0.5)
 ccd = read_ale(joinpath(@__DIR__, &quot;../../example/example-1/ale&quot;), w)</code></pre><pre><code class="language-none">┌ Warning: `sort(d::Dict; args...)` is deprecated, use `sort!(OrderedDict(d); args...)` instead.
@@ -217,7 +227,7 @@ ccd = read_ale(joinpath(@__DIR__, &quot;../../example/example-1/ale&quot;), w)</
  CCD{UInt16,Float64}(Γ=59, 𝓛=13)
  CCD{UInt16,Float64}(Γ=95, 𝓛=13)
  CCD{UInt16,Float64}(Γ=67, 𝓛=13)
- CCD{UInt16,Float64}(Γ=65, 𝓛=13)</code></pre></div><p>Note that the duplication and loss rates should here be specified on a log-scale for the DLWGD model.</p><div><pre><code class="language-julia">@model branchrates(model, ccd, ::Type{T}=Matrix{Float64}) where {T} = begin
+ CCD{UInt16,Float64}(Γ=65, 𝓛=13)</code></pre></div><p>Note that the duplication and loss rates should here be specified on a log-scale for the DLWGD model. We use an LKJ prior for the covariance matrix, specifying a prior for the correlation of duplication and loss rates (<code>ρ</code>) and a prior for the scale parameter <code>τ</code>, see e.g. the <a href="https://mc-stan.org/docs/2_23/stan-users-guide/multivariate-hierarchical-priors-section.html">stan docs</a></p><div><pre><code class="language-julia">@model branchrates(model, ccd, ::Type{T}=Matrix{Float64}) where {T} = begin
     η ~ Beta(3,1)
     ρ ~ Uniform(-1, 1.)
     τ ~ truncated(Cauchy(0, 1), 0, Inf)
@@ -237,109 +247,112 @@ end
 
 model = branchrates(w, ccd)
 chain = sample(model, NUTS(0.65), 100)</code></pre><pre><code class="language-none">┌ Info: Found initial step size
-└   ϵ = 0.025
+└   ϵ = 0.05
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/P9wqk/src/hamiltonian.jl:47
 Sampling   0%|                                          |  ETA: N/A
-Sampling   1%|▍                                         |  ETA: 0:01:56
-Sampling   2%|▉                                         |  ETA: 0:01:03
-Sampling   3%|█▎                                        |  ETA: 0:00:47
-Sampling   4%|█▋                                        |  ETA: 0:00:49
-Sampling   5%|██▏                                       |  ETA: 0:00:51
-Sampling   6%|██▌                                       |  ETA: 0:00:47
-Sampling   7%|███                                       |  ETA: 0:01:44
-Sampling   8%|███▍                                      |  ETA: 0:01:37
-Sampling   9%|███▊                                      |  ETA: 0:01:28
-Sampling  10%|████▎                                     |  ETA: 0:01:24
-Sampling  11%|████▋                                     |  ETA: 0:01:35
-Sampling  12%|█████                                     |  ETA: 0:01:30
-Sampling  13%|█████▌                                    |  ETA: 0:01:25
-Sampling  14%|█████▉                                    |  ETA: 0:01:25
+Sampling   1%|▍                                         |  ETA: 0:01:27
+Sampling   2%|▉                                         |  ETA: 0:00:49
+Sampling   3%|█▎                                        |  ETA: 0:00:38
+Sampling   4%|█▋                                        |  ETA: 0:00:45
+Sampling   5%|██▏                                       |  ETA: 0:01:02
+Sampling   6%|██▌                                       |  ETA: 0:01:35
+Sampling   7%|███                                       |  ETA: 0:01:25
+Sampling   8%|███▍                                      |  ETA: 0:01:30
+Sampling   9%|███▊                                      |  ETA: 0:01:32
+Sampling  10%|████▎                                     |  ETA: 0:01:47
+Sampling  11%|████▋                                     |  ETA: 0:01:39
+Sampling  12%|█████                                     |  ETA: 0:01:31
+Sampling  13%|█████▌                                    |  ETA: 0:01:32
+Sampling  14%|█████▉                                    |  ETA: 0:01:27
 Sampling  15%|██████▎                                   |  ETA: 0:01:20
-Sampling  16%|██████▊                                   |  ETA: 0:01:15
-Sampling  17%|███████▏                                  |  ETA: 0:01:21
-Sampling  18%|███████▌                                  |  ETA: 0:01:17
-Sampling  19%|████████                                  |  ETA: 0:01:14
+Sampling  16%|██████▊                                   |  ETA: 0:01:18
+Sampling  17%|███████▏                                  |  ETA: 0:01:14
+Sampling  18%|███████▌                                  |  ETA: 0:01:22
+Sampling  19%|████████                                  |  ETA: 0:01:18
 Sampling  20%|████████▍                                 |  ETA: 0:01:14
 Sampling  21%|████████▉                                 |  ETA: 0:01:12
-Sampling  22%|█████████▎                                |  ETA: 0:01:12
-Sampling  23%|█████████▋                                |  ETA: 0:01:09
-Sampling  24%|██████████▏                               |  ETA: 0:01:09
+Sampling  22%|█████████▎                                |  ETA: 0:01:10
+Sampling  23%|█████████▋                                |  ETA: 0:01:12
+Sampling  24%|██████████▏                               |  ETA: 0:01:10
 Sampling  25%|██████████▌                               |  ETA: 0:01:07
-Sampling  26%|██████████▉                               |  ETA: 0:01:05
-Sampling  27%|███████████▍                              |  ETA: 0:01:02
+Sampling  26%|██████████▉                               |  ETA: 0:01:07
+Sampling  27%|███████████▍                              |  ETA: 0:01:07
 Sampling  28%|███████████▊                              |  ETA: 0:01:04
-Sampling  29%|████████████▏                             |  ETA: 0:01:02
-Sampling  30%|████████████▋                             |  ETA: 0:01:01
-Sampling  31%|█████████████                             |  ETA: 0:01:00
-Sampling  32%|█████████████▌                            |  ETA: 0:00:58
-Sampling  33%|█████████████▉                            |  ETA: 0:00:55
-Sampling  34%|██████████████▎                           |  ETA: 0:00:55
-Sampling  35%|██████████████▊                           |  ETA: 0:00:54
-Sampling  36%|███████████████▏                          |  ETA: 0:00:53
-Sampling  37%|███████████████▌                          |  ETA: 0:00:53
+Sampling  29%|████████████▏                             |  ETA: 0:01:08
+Sampling  30%|████████████▋                             |  ETA: 0:01:06
+Sampling  31%|█████████████                             |  ETA: 0:01:04
+Sampling  32%|█████████████▌                            |  ETA: 0:01:02
+Sampling  33%|█████████████▉                            |  ETA: 0:01:00
+Sampling  34%|██████████████▎                           |  ETA: 0:00:59
+Sampling  35%|██████████████▊                           |  ETA: 0:00:57
+Sampling  36%|███████████████▏                          |  ETA: 0:00:55
+Sampling  37%|███████████████▌                          |  ETA: 0:00:54
 Sampling  38%|████████████████                          |  ETA: 0:00:52
-Sampling  39%|████████████████▍                         |  ETA: 0:00:51
-Sampling  40%|████████████████▊                         |  ETA: 0:00:51
-Sampling  41%|█████████████████▎                        |  ETA: 0:00:49
-Sampling  42%|█████████████████▋                        |  ETA: 0:00:48
-Sampling  43%|██████████████████                        |  ETA: 0:00:46
-Sampling  44%|██████████████████▌                       |  ETA: 0:00:46
-Sampling  45%|██████████████████▉                       |  ETA: 0:00:45
-Sampling  46%|███████████████████▍                      |  ETA: 0:00:43
-Sampling  47%|███████████████████▊                      |  ETA: 0:00:43
-Sampling  48%|████████████████████▏                     |  ETA: 0:00:42
-Sampling  49%|████████████████████▋                     |  ETA: 0:00:41
-Sampling  50%|█████████████████████                     |  ETA: 0:00:40
-Sampling  51%|█████████████████████▍                    |  ETA: 0:00:39
-Sampling  52%|█████████████████████▉                    |  ETA: 0:00:39
-Sampling  53%|██████████████████████▎                   |  ETA: 0:00:38
-Sampling  54%|██████████████████████▋                   |  ETA: 0:00:37
-Sampling  55%|███████████████████████▏                  |  ETA: 0:00:36
-Sampling  56%|███████████████████████▌                  |  ETA: 0:00:35
-Sampling  57%|████████████████████████                  |  ETA: 0:00:34
-Sampling  58%|████████████████████████▍                 |  ETA: 0:00:33
-Sampling  59%|████████████████████████▊                 |  ETA: 0:00:33
-Sampling  60%|█████████████████████████▎                |  ETA: 0:00:32
-Sampling  61%|█████████████████████████▋                |  ETA: 0:00:31
-Sampling  62%|██████████████████████████                |  ETA: 0:00:30
-Sampling  63%|██████████████████████████▌               |  ETA: 0:00:30
-Sampling  64%|██████████████████████████▉               |  ETA: 0:00:29
-Sampling  65%|███████████████████████████▎              |  ETA: 0:00:28
-Sampling  66%|███████████████████████████▊              |  ETA: 0:00:27
-Sampling  67%|████████████████████████████▏             |  ETA: 0:00:26
-Sampling  68%|████████████████████████████▌             |  ETA: 0:00:25
-Sampling  69%|█████████████████████████████             |  ETA: 0:00:24
-Sampling  70%|█████████████████████████████▍            |  ETA: 0:00:23
-Sampling  71%|█████████████████████████████▉            |  ETA: 0:00:22
-Sampling  72%|██████████████████████████████▎           |  ETA: 0:00:22
-Sampling  73%|██████████████████████████████▋           |  ETA: 0:00:21
-Sampling  74%|███████████████████████████████▏          |  ETA: 0:00:20
-Sampling  75%|███████████████████████████████▌          |  ETA: 0:00:19
-Sampling  76%|███████████████████████████████▉          |  ETA: 0:00:18
-Sampling  77%|████████████████████████████████▍         |  ETA: 0:00:17
-Sampling  78%|████████████████████████████████▊         |  ETA: 0:00:17
-Sampling  79%|█████████████████████████████████▏        |  ETA: 0:00:16
-Sampling  80%|█████████████████████████████████▋        |  ETA: 0:00:15
-Sampling  81%|██████████████████████████████████        |  ETA: 0:00:14
-Sampling  82%|██████████████████████████████████▌       |  ETA: 0:00:14
-Sampling  83%|██████████████████████████████████▉       |  ETA: 0:00:13
-Sampling  84%|███████████████████████████████████▎      |  ETA: 0:00:12
-Sampling  85%|███████████████████████████████████▊      |  ETA: 0:00:11
-Sampling  86%|████████████████████████████████████▏     |  ETA: 0:00:10
-Sampling  87%|████████████████████████████████████▌     |  ETA: 0:00:10
-Sampling  88%|█████████████████████████████████████     |  ETA: 0:00:09
-Sampling  89%|█████████████████████████████████████▍    |  ETA: 0:00:08
-Sampling  90%|█████████████████████████████████████▊    |  ETA: 0:00:07
+Sampling  39%|████████████████▍                         |  ETA: 0:00:50
+Sampling  40%|████████████████▊                         |  ETA: 0:00:49
+Sampling  41%|█████████████████▎                        |  ETA: 0:00:48
+Sampling  42%|█████████████████▋                        |  ETA: 0:00:47
+Sampling  43%|██████████████████                        |  ETA: 0:00:45
+Sampling  44%|██████████████████▌                       |  ETA: 0:00:44
+Sampling  45%|██████████████████▉                       |  ETA: 0:00:46
+Sampling  46%|███████████████████▍                      |  ETA: 0:00:45
+Sampling  47%|███████████████████▊                      |  ETA: 0:00:44
+Sampling  48%|████████████████████▏                     |  ETA: 0:00:43
+Sampling  49%|████████████████████▋                     |  ETA: 0:00:42
+Sampling  50%|█████████████████████                     |  ETA: 0:00:41
+Sampling  51%|█████████████████████▍                    |  ETA: 0:00:41
+Sampling  52%|█████████████████████▉                    |  ETA: 0:00:40
+Sampling  53%|██████████████████████▎                   |  ETA: 0:00:40
+Sampling  54%|██████████████████████▋                   |  ETA: 0:00:40
+Sampling  55%|███████████████████████▏                  |  ETA: 0:00:39
+Sampling  56%|███████████████████████▌                  |  ETA: 0:00:38
+Sampling  57%|████████████████████████                  |  ETA: 0:00:37
+Sampling  58%|████████████████████████▍                 |  ETA: 0:00:36
+Sampling  59%|████████████████████████▊                 |  ETA: 0:00:35
+Sampling  60%|█████████████████████████▎                |  ETA: 0:00:34
+Sampling  61%|█████████████████████████▋                |  ETA: 0:00:33
+Sampling  62%|██████████████████████████                |  ETA: 0:00:32
+Sampling  63%|██████████████████████████▌               |  ETA: 0:00:31
+Sampling  64%|██████████████████████████▉               |  ETA: 0:00:30
+Sampling  65%|███████████████████████████▎              |  ETA: 0:00:30
+Sampling  66%|███████████████████████████▊              |  ETA: 0:00:29
+Sampling  67%|████████████████████████████▏             |  ETA: 0:00:28
+Sampling  68%|████████████████████████████▌             |  ETA: 0:00:27
+Sampling  69%|█████████████████████████████             |  ETA: 0:00:26
+Sampling  70%|█████████████████████████████▍            |  ETA: 0:00:25
+Sampling  71%|█████████████████████████████▉            |  ETA: 0:00:24
+Sampling  72%|██████████████████████████████▎           |  ETA: 0:00:23
+Sampling  73%|██████████████████████████████▋           |  ETA: 0:00:22
+Sampling  74%|███████████████████████████████▏          |  ETA: 0:00:22
+Sampling  75%|███████████████████████████████▌          |  ETA: 0:00:21
+Sampling  76%|███████████████████████████████▉          |  ETA: 0:00:20
+Sampling  77%|████████████████████████████████▍         |  ETA: 0:00:19
+Sampling  78%|████████████████████████████████▊         |  ETA: 0:00:18
+Sampling  79%|█████████████████████████████████▏        |  ETA: 0:00:17
+Sampling  80%|█████████████████████████████████▋        |  ETA: 0:00:17
+Sampling  81%|██████████████████████████████████        |  ETA: 0:00:16
+Sampling  82%|██████████████████████████████████▌       |  ETA: 0:00:15
+Sampling  83%|██████████████████████████████████▉       |  ETA: 0:00:14
+Sampling  84%|███████████████████████████████████▎      |  ETA: 0:00:13
+Sampling  85%|███████████████████████████████████▊      |  ETA: 0:00:12
+Sampling  86%|████████████████████████████████████▏     |  ETA: 0:00:12
+Sampling  87%|████████████████████████████████████▌     |  ETA: 0:00:11
+Sampling  88%|█████████████████████████████████████     |  ETA: 0:00:10
+Sampling  89%|█████████████████████████████████████▍    |  ETA: 0:00:09
+Sampling  90%|█████████████████████████████████████▊    |  ETA: 0:00:08
 Sampling  91%|██████████████████████████████████████▎   |  ETA: 0:00:07
-Sampling  92%|██████████████████████████████████████▋   |  ETA: 0:00:06
-Sampling  93%|███████████████████████████████████████   |  ETA: 0:00:05
-Sampling  94%|███████████████████████████████████████▌  |  ETA: 0:00:04
+Sampling  92%|██████████████████████████████████████▋   |  ETA: 0:00:07
+Sampling  93%|███████████████████████████████████████   |  ETA: 0:00:06
+Sampling  94%|███████████████████████████████████████▌  |  ETA: 0:00:05
 Sampling  95%|███████████████████████████████████████▉  |  ETA: 0:00:04
 Sampling  96%|████████████████████████████████████████▍ |  ETA: 0:00:03
 Sampling  97%|████████████████████████████████████████▊ |  ETA: 0:00:02
-Sampling  98%|█████████████████████████████████████████▏|  ETA: 0:00:01
+Sampling  98%|█████████████████████████████████████████▏|  ETA: 0:00:02
 Sampling  99%|█████████████████████████████████████████▋|  ETA: 0:00:01
-Sampling 100%|██████████████████████████████████████████| Time: 0:01:12
-Sampling 100%|██████████████████████████████████████████| Time: 0:01:12
+Sampling 100%|██████████████████████████████████████████| Time: 0:01:22
+Sampling 100%|██████████████████████████████████████████| Time: 0:01:22
 Object of type Chains, with data of type 50×51×1 Array{Float64,3}
 
 Iterations        = 1:50
@@ -352,120 +365,126 @@ parameters        = q1, q2, r[Colon(),1][1], r[Colon(),1][2], r[Colon(),2][1], r
 2-element Array{MCMCChains.ChainDataFrame,1}
 
 Summary Statistics
-        parameters     mean     std  naive_se     mcse       ess   r_hat
-  ────────────────  ───────  ──────  ────────  ───────  ────────  ──────
-                q1   0.3635  0.1988    0.0281  missing   39.9689  0.9802
-                q2   0.0822  0.0885    0.0125  missing   10.5836  0.9974
-   r[Colon(),1][1]  -2.0930  0.2256    0.0319  missing   13.9296  1.0644
-   r[Colon(),1][2]  -1.9040  0.2576    0.0364  missing   15.5554  0.9801
-   r[Colon(),2][1]  -2.3590  0.5350    0.0757  missing   18.8419  1.0642
-   r[Colon(),2][2]  -2.1330  0.4288    0.0606  missing   19.3909  1.0829
-   r[Colon(),3][1]  -2.7801  0.4588    0.0649  missing   13.0315  1.1010
-   r[Colon(),3][2]  -2.3546  0.4022    0.0569  missing  132.3257  1.0099
-   r[Colon(),4][1]  -3.1080  0.5233    0.0740  missing    6.7821  1.1777
-   r[Colon(),4][2]  -2.4495  0.5555    0.0786  missing   23.3174  1.0839
-   r[Colon(),5][1]  -2.3288  0.5194    0.0735  missing   15.6330  0.9815
-   r[Colon(),5][2]  -2.9024  0.6131    0.0867  missing   14.2928  1.1191
-   r[Colon(),6][1]  -1.4839  0.5333    0.0754  missing   77.3483  0.9871
-   r[Colon(),6][2]  -1.5374  0.4412    0.0624  missing   45.5589  0.9807
-   r[Colon(),7][1]  -1.2055  0.3898    0.0551  missing   37.5519  1.0661
-   r[Colon(),7][2]  -0.8703  0.3718    0.0526  missing   11.1049  1.1005
-   r[Colon(),8][1]  -2.0423  0.6629    0.0937  missing   16.8473  1.0229
-   r[Colon(),8][2]  -1.1864  0.4753    0.0672  missing  173.2718  0.9909
-   r[Colon(),9][1]  -2.2951  0.5661    0.0801  missing   64.1713  0.9815
-   r[Colon(),9][2]  -1.6241  0.5741    0.0812  missing   95.8234  1.0010
-  r[Colon(),10][1]  -2.3483  0.6674    0.0944  missing   52.9561  0.9819
-  r[Colon(),10][2]  -1.8933  0.7253    0.1026  missing   49.7949  1.0026
-  r[Colon(),11][1]  -1.5437  0.7029    0.0994  missing   77.6108  0.9805
-  r[Colon(),11][2]  -0.8864  0.6020    0.0851  missing    6.9963  1.1399
-  r[Colon(),12][1]  -2.3122  0.6212    0.0878  missing   75.2064  0.9826
-  r[Colon(),12][2]  -2.3893  0.7374    0.1043  missing   54.8428  1.0548
-  r[Colon(),13][1]  -2.4123  0.5999    0.0848  missing   50.3924  0.9814
-  r[Colon(),13][2]  -2.2546  0.7996    0.1131  missing   12.3735  1.0707
-  r[Colon(),14][1]  -2.5741  0.6041    0.0854  missing   30.9380  1.0271
-  r[Colon(),14][2]  -1.7007  0.4873    0.0689  missing   70.2721  0.9876
-  r[Colon(),15][1]  -1.2981  0.4240    0.0600  missing   36.0605  1.0291
-  r[Colon(),15][2]  -2.0129  0.7376    0.1043  missing   63.5272  1.0028
-  r[Colon(),16][1]  -2.5747  0.8745    0.1237  missing   15.1628  1.0364
-  r[Colon(),16][2]  -2.2469  0.9467    0.1339  missing   38.9950  0.9874
-  r[Colon(),17][1]  -1.9764  0.5960    0.0843  missing   48.3242  1.0046
-  r[Colon(),17][2]  -1.9219  0.8768    0.1240  missing   17.1284  0.9943
-                 η   0.8245  0.0846    0.0120  missing  110.2649  0.9866
-                 ρ   0.4135  0.3176    0.0449  missing    9.6960  0.9808
-                 τ   0.7950  0.2388    0.0338  missing    2.8016  1.3773
+        parameters     mean     std  naive_se     mcse         ess   r_hat
+  ────────────────  ───────  ──────  ────────  ───────  ──────────  ──────
+                q1   0.4113  0.2545    0.0360  missing     15.0583  0.9814
+                q2   0.1078  0.0761    0.0108  missing  -1636.2189  0.9850
+   r[Colon(),1][1]  -2.0897  0.1929    0.0273  missing      4.3878  1.2123
+   r[Colon(),1][2]  -1.9508  0.2712    0.0384  missing      9.7931  1.1552
+   r[Colon(),2][1]  -2.2352  0.3083    0.0436  missing     50.9944  1.0763
+   r[Colon(),2][2]  -2.0277  0.4303    0.0609  missing     18.4583  1.0370
+   r[Colon(),3][1]  -2.5307  0.3702    0.0524  missing     66.1697  1.0260
+   r[Colon(),3][2]  -2.2394  0.4523    0.0640  missing     13.4723  1.0662
+   r[Colon(),4][1]  -2.8508  0.4719    0.0667  missing     91.8816  1.0179
+   r[Colon(),4][2]  -2.3307  0.4557    0.0644  missing     25.8938  1.0011
+   r[Colon(),5][1]  -2.2211  0.4407    0.0623  missing    123.8442  0.9842
+   r[Colon(),5][2]  -2.4983  0.4204    0.0595  missing     55.8608  0.9852
+   r[Colon(),6][1]  -1.6104  0.3787    0.0536  missing     19.6807  1.0224
+   r[Colon(),6][2]  -1.6799  0.3969    0.0561  missing     86.7096  0.9884
+   r[Colon(),7][1]  -1.3926  0.5905    0.0835  missing     23.3792  1.0162
+   r[Colon(),7][2]  -1.1957  0.5814    0.0822  missing     22.4135  0.9872
+   r[Colon(),8][1]  -1.8542  0.4782    0.0676  missing    120.8174  0.9873
+   r[Colon(),8][2]  -1.4280  0.4873    0.0689  missing     11.1751  1.0646
+   r[Colon(),9][1]  -2.1441  0.3366    0.0476  missing    109.1483  0.9824
+   r[Colon(),9][2]  -1.5862  0.3364    0.0476  missing     19.3798  0.9931
+  r[Colon(),10][1]  -2.1827  0.6553    0.0927  missing     12.0689  1.1030
+  r[Colon(),10][2]  -2.0544  0.8220    0.1163  missing     22.5963  1.0224
+  r[Colon(),11][1]  -1.6773  0.6811    0.0963  missing     44.8139  0.9819
+  r[Colon(),11][2]  -1.5914  0.7981    0.1129  missing     25.1801  1.0000
+  r[Colon(),12][1]  -2.2260  0.4485    0.0634  missing      9.9095  1.1400
+  r[Colon(),12][2]  -2.2093  0.5292    0.0748  missing     11.9778  1.0443
+  r[Colon(),13][1]  -2.2246  0.4494    0.0636  missing     53.9852  0.9853
+  r[Colon(),13][2]  -1.9735  0.5035    0.0712  missing     10.4554  1.0798
+  r[Colon(),14][1]  -2.6716  0.4969    0.0703  missing      8.1857  1.1243
+  r[Colon(),14][2]  -2.0958  0.7241    0.1024  missing     18.5609  1.0265
+  r[Colon(),15][1]  -1.5236  0.5185    0.0733  missing     98.1716  0.9871
+  r[Colon(),15][2]  -2.0080  0.5134    0.0726  missing     13.5587  1.1255
+  r[Colon(),16][1]  -2.3338  0.5199    0.0735  missing      6.4151  1.1619
+  r[Colon(),16][2]  -2.0793  0.7506    0.1062  missing     17.0679  1.0366
+  r[Colon(),17][1]  -2.2056  0.5685    0.0804  missing     10.5118  1.1051
+  r[Colon(),17][2]  -1.9659  0.6636    0.0939  missing      5.7449  1.1679
+                 η   0.7949  0.0943    0.0133  missing     27.4473  1.0217
+                 ρ   0.4549  0.3209    0.0454  missing     13.9205  0.9832
+                 τ   0.6259  0.1943    0.0275  missing     12.1934  1.0013
 
 Quantiles
         parameters     2.5%    25.0%    50.0%    75.0%    97.5%
   ────────────────  ───────  ───────  ───────  ───────  ───────
-                q1   0.0485   0.2264   0.3829   0.5194   0.6999
-                q2   0.0043   0.0396   0.0612   0.1019   0.2745
-   r[Colon(),1][1]  -2.4167  -2.2154  -2.1197  -1.9946  -1.5950
-   r[Colon(),1][2]  -2.4323  -2.0369  -1.8959  -1.7592  -1.4749
-   r[Colon(),2][1]  -3.7385  -2.5623  -2.2415  -2.0294  -1.6987
-   r[Colon(),2][2]  -2.9665  -2.5259  -2.0424  -1.8173  -1.5466
-   r[Colon(),3][1]  -3.7597  -3.0126  -2.7372  -2.4758  -1.9596
-   r[Colon(),3][2]  -3.0504  -2.6515  -2.3058  -2.0332  -1.6641
-   r[Colon(),4][1]  -4.2109  -3.5115  -3.0778  -2.7701  -2.1967
-   r[Colon(),4][2]  -3.6020  -2.7936  -2.3110  -2.0606  -1.6645
-   r[Colon(),5][1]  -3.4636  -2.5170  -2.2644  -2.0042  -1.6367
-   r[Colon(),5][2]  -4.1660  -3.3111  -2.8210  -2.4367  -2.0009
-   r[Colon(),6][1]  -2.5811  -1.7773  -1.4573  -1.0925  -0.6371
-   r[Colon(),6][2]  -2.4390  -1.7988  -1.5459  -1.2124  -0.8383
-   r[Colon(),7][1]  -1.9140  -1.5293  -1.1614  -0.9727  -0.4554
-   r[Colon(),7][2]  -1.5456  -1.2057  -0.8258  -0.5989  -0.2758
-   r[Colon(),8][1]  -3.7439  -2.3100  -1.9404  -1.6773  -0.9297
-   r[Colon(),8][2]  -2.0918  -1.5700  -1.1570  -0.8736  -0.4278
-   r[Colon(),9][1]  -3.5026  -2.6580  -2.2189  -1.8426  -1.4378
-   r[Colon(),9][2]  -2.7837  -2.0022  -1.5516  -1.1405  -0.7834
-  r[Colon(),10][1]  -3.7668  -2.6875  -2.2738  -1.9202  -1.2808
-  r[Colon(),10][2]  -3.1781  -2.3573  -1.8788  -1.2878  -0.6855
-  r[Colon(),11][1]  -2.6575  -1.8268  -1.5416  -1.0903  -0.3846
-  r[Colon(),11][2]  -1.7531  -1.2496  -1.0218  -0.4840   0.2716
-  r[Colon(),12][1]  -3.2868  -2.7748  -2.2278  -1.7983  -1.2300
-  r[Colon(),12][2]  -3.8082  -2.9393  -2.4995  -1.7101  -1.1515
-  r[Colon(),13][1]  -3.2154  -2.9213  -2.5464  -1.9258  -1.1928
-  r[Colon(),13][2]  -3.9864  -2.6032  -2.0844  -1.6788  -1.1737
-  r[Colon(),14][1]  -3.7334  -2.8939  -2.5755  -2.0741  -1.6068
-  r[Colon(),14][2]  -2.5828  -2.0637  -1.6374  -1.4175  -0.7409
-  r[Colon(),15][1]  -2.0533  -1.6399  -1.2255  -0.9392  -0.6740
-  r[Colon(),15][2]  -3.5407  -2.4909  -2.0355  -1.4674  -0.9204
-  r[Colon(),16][1]  -4.4910  -3.1114  -2.4449  -2.0644  -1.0257
-  r[Colon(),16][2]  -3.9295  -2.9153  -2.2375  -1.7319  -0.6928
-  r[Colon(),17][1]  -3.2463  -2.2604  -1.9237  -1.6684  -0.9114
-  r[Colon(),17][2]  -3.6216  -2.4890  -1.7455  -1.2753  -0.6518
-                 η   0.6408   0.7730   0.8317   0.8738   0.9621
-                 ρ  -0.3142   0.2483   0.4319   0.6323   0.8959
-                 τ   0.4929   0.5839   0.7700   0.9047   1.3023</code></pre></div><div class="admonition warning"><div class="admonition-title">Warning</div><div class="admonition-text"><p>Of course such a chain should be run much longer than in this example! Here a very short chain is presented to ensure reasonable build times for this documentation.</p></div></div><p>Let&#39;s obtain reconciled trees</p><div><pre><code class="language-julia">pdf = DataFrame(chain)
+                q1   0.0436   0.2295   0.3427   0.5288   0.9509
+                q2   0.0098   0.0522   0.1004   0.1509   0.2786
+   r[Colon(),1][1]  -2.3732  -2.2669  -2.0607  -1.9377  -1.7729
+   r[Colon(),1][2]  -2.4784  -2.1002  -1.9081  -1.7946  -1.5840
+   r[Colon(),2][1]  -2.8214  -2.3239  -2.2645  -2.1008  -1.6427
+   r[Colon(),2][2]  -2.6408  -2.3696  -2.0666  -1.6905  -1.3080
+   r[Colon(),3][1]  -3.1745  -2.7178  -2.5354  -2.3111  -1.8489
+   r[Colon(),3][2]  -2.9914  -2.4314  -2.2523  -1.8152  -1.5578
+   r[Colon(),4][1]  -3.6529  -3.1060  -2.8527  -2.5540  -1.8120
+   r[Colon(),4][2]  -3.1023  -2.5992  -2.3823  -1.9854  -1.5022
+   r[Colon(),5][1]  -3.2907  -2.4133  -2.1427  -1.8866  -1.6257
+   r[Colon(),5][2]  -3.2674  -2.7582  -2.4060  -2.2442  -1.7370
+   r[Colon(),6][1]  -2.1630  -1.8227  -1.6421  -1.3584  -0.9210
+   r[Colon(),6][2]  -2.4440  -2.0408  -1.6623  -1.3923  -0.9778
+   r[Colon(),7][1]  -2.2929  -1.8715  -1.2950  -1.0750  -0.2238
+   r[Colon(),7][2]  -2.1883  -1.5210  -1.0867  -0.8139  -0.1590
+   r[Colon(),8][1]  -2.6394  -2.1698  -1.8887  -1.5774  -0.6706
+   r[Colon(),8][2]  -2.2922  -1.7630  -1.3446  -1.0403  -0.6829
+   r[Colon(),9][1]  -2.6749  -2.4065  -2.1469  -1.9299  -1.5315
+   r[Colon(),9][2]  -2.1314  -1.8591  -1.5786  -1.3574  -0.9329
+  r[Colon(),10][1]  -3.1439  -2.6767  -2.1457  -1.7898  -1.1451
+  r[Colon(),10][2]  -3.1120  -2.8039  -2.0637  -1.3935  -0.7539
+  r[Colon(),11][1]  -3.1536  -2.0034  -1.7209  -1.3125  -0.3684
+  r[Colon(),11][2]  -2.8114  -2.2412  -1.7038  -1.1796   0.1358
+  r[Colon(),12][1]  -3.0076  -2.5525  -2.2184  -1.9032  -1.5379
+  r[Colon(),12][2]  -3.1981  -2.5550  -2.1746  -1.9269  -1.1089
+  r[Colon(),13][1]  -2.9106  -2.5223  -2.3105  -2.0213  -1.3871
+  r[Colon(),13][2]  -2.6795  -2.4046  -1.9677  -1.5677  -1.1159
+  r[Colon(),14][1]  -3.6370  -3.0011  -2.6945  -2.2491  -1.7895
+  r[Colon(),14][2]  -3.2795  -2.5417  -2.0204  -1.5776  -1.0315
+  r[Colon(),15][1]  -2.2949  -1.9305  -1.6179  -1.0451  -0.6792
+  r[Colon(),15][2]  -2.8444  -2.4138  -2.0146  -1.6147  -1.1612
+  r[Colon(),16][1]  -3.2448  -2.9435  -2.2653  -1.9058  -1.6669
+  r[Colon(),16][2]  -3.1542  -2.5336  -1.9816  -1.6610  -0.8715
+  r[Colon(),17][1]  -2.9344  -2.6590  -2.3104  -1.7508  -1.2327
+  r[Colon(),17][2]  -3.1141  -2.3432  -1.7470  -1.5371  -0.9901
+                 η   0.6288   0.7231   0.8080   0.8888   0.9262
+                 ρ  -0.1959   0.1938   0.5663   0.7250   0.8381
+                 τ   0.3823   0.4628   0.5985   0.7320   1.0072</code></pre></div><div class="admonition warning"><div class="admonition-title">Warning</div><div class="admonition-text"><p>Of course such a chain should be run much longer than in this example! Here a very short chain is presented to ensure reasonable build times for this documentation.</p></div></div><p>Now let&#39;s obtain reconciled trees</p><div><pre><code class="language-julia">pdf = DataFrame(chain)
 fun = (m, x)-&gt; Array(x) |&gt; x-&gt;m((λ=x[3:2:36], μ=x[4:2:36], η=x[end-2], q=x[1:2]))
 tt = TreeTracker(w, ccd[end-1:end], pdf, fun)
 trees = track(tt)</code></pre><pre><code class="language-none">[ Info: Tracking OG0004585.fasta.nex.treesample.ale
 [ Info: Tracking OG0004590.fasta.nex.treesample.ale
 2-element Array{Whale.RecSummary,1}:
  RecSummary(# unique trees = 15)
- RecSummary(# unique trees = 15)</code></pre></div><p>Let&#39;s have a look at the first family</p><div><pre><code class="language-julia">trees[1].trees</code></pre><pre><code class="language-none">15-element Array{NamedTuple,1}:
- (freq = 0.18, tree = Node(27, 17, ))
+ RecSummary(# unique trees = 16)</code></pre></div><p>Let&#39;s have a look at the first family</p><div><pre><code class="language-julia">trees[1].trees</code></pre><pre><code class="language-none">15-element Array{NamedTuple,1}:
+ (freq = 0.2, tree = Node(29, 17, ))
+ (freq = 0.2, tree = Node(29, 17, ))
  (freq = 0.12, tree = Node(31, 17, ))
  (freq = 0.12, tree = Node(27, 17, ))
- (freq = 0.1, tree = Node(31, 17, ))
- (freq = 0.1, tree = Node(29, 17, ))
- (freq = 0.08, tree = Node(27, 17, ))
- (freq = 0.08, tree = Node(29, 17, ))
- (freq = 0.06, tree = Node(31, 17, ))
- (freq = 0.04, tree = Node(29, 17, ))
- (freq = 0.02, tree = Node(35, 17, ))
- (freq = 0.02, tree = Node(27, 17, ))
- (freq = 0.02, tree = Node(35, 17, ))
- (freq = 0.02, tree = Node(35, 17, ))
+ (freq = 0.1, tree = Node(27, 17, ))
+ (freq = 0.04, tree = Node(27, 17, ))
+ (freq = 0.04, tree = Node(33, 17, ))
+ (freq = 0.04, tree = Node(31, 17, ))
  (freq = 0.02, tree = Node(33, 17, ))
- (freq = 0.02, tree = Node(43, 17, ))</code></pre></div><p>Or maybe all the gene pairs</p><div><pre><code class="language-julia">ps = Whale.getpairs(trees, w);</code></pre></div><p>Now let&#39;s look at the gene pairs which have a non-zero posterior probability of being derived from WGD node 18 (the <em>Arabidopsis</em> WGD, execute <code>@show w</code> to check the model structure)</p><div><pre><code class="language-julia">p = filter(x-&gt;x[Symbol(&quot;18_wgd&quot;)] &gt; 0.0, ps)[!,:pair]</code></pre><pre><code class="language-none">1-element Array{String,1}:
+ (freq = 0.02, tree = Node(31, 17, ))
+ (freq = 0.02, tree = Node(37, 17, ))
+ (freq = 0.02, tree = Node(35, 17, ))
+ (freq = 0.02, tree = Node(37, 17, ))
+ (freq = 0.02, tree = Node(35, 17, ))
+ (freq = 0.02, tree = Node(37, 17, ))</code></pre></div><p>Or maybe all the gene pairs</p><div><pre><code class="language-julia">ps = Whale.getpairs(trees, w);</code></pre></div><p>Now let&#39;s look at the gene pairs which have a non-zero posterior probability of being derived from WGD node 18 (the <em>Arabidopsis</em> WGD, execute <code>@show w</code> to check the model structure)</p><div><pre><code class="language-julia">p = filter(x-&gt;x[Symbol(&quot;18_wgd&quot;)] &gt; 0.0, ps)[!,:pair]</code></pre><pre><code class="language-none">1-element Array{String,1}:
  &quot;PPAT_Pp3c15_24010V3.1_Pp3c15_24010__PPAT_Pp3c9_24230V3.2_Pp3c9_24230&quot;</code></pre></div><p>The full (approximate) probability distribution over reconciliation events for this gene pair is</p><div><pre><code class="language-julia">row = ps[ps[!,:pair] .== p[1],1:end-2]
 for (k,v) in zip(names(row), Array(row))
     v &gt; 0. &amp;&amp; println(k, &quot;: &quot;, v)
-end</code></pre><pre><code class="language-none">18_duplication: 0.3
-2_duplication: 0.3
-18_wgd: 0.4</code></pre></div><p>The following can also be helpful</p><div><pre><code class="language-julia">tables = Whale.getwgdtables(trees, ccd, w)
-tables[1]</code></pre><pre><code class="language-none">&quot;wgd_1&quot; =&gt; 1×7 DataFrame. Omitted printing of 2 columns
+end</code></pre><pre><code class="language-none">18_duplication: 0.22
+2_duplication: 0.48
+18_wgd: 0.3</code></pre></div><p>The following can also be helpful</p><div><pre><code class="language-julia">tables = Whale.getwgdtables(trees, ccd, w)
+tables</code></pre><pre><code class="language-none">2-element Array{Pair{String,DataFrames.DataFrame},1}:
+ &quot;wgd_1&quot; =&gt; 1×7 DataFrame. Omitted printing of 2 columns
 │ Row │ family │ frequency │ clade  │ left   │ right  │
 │     │ Int64  │ Float64   │ UInt16 │ UInt16 │ UInt16 │
 ├─────┼────────┼───────────┼────────┼────────┼────────┤
-│ 1   │ 1      │ 0.4       │ 0x0010 │ 0x000b │ 0x000c │</code></pre></div><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../wgd-dhmc/"><span class="direction">Previous</span><span class="title">Bayesian inference using NUTS with <code>DynamicHMC.jl</code></span></a><a class="next" href="../cytp450/"><span class="direction">Next</span><span class="title">Reconciled tree inference example</span></a></footer></article></body></html>
+│ 1   │ 1      │ 0.3       │ 0x0010 │ 0x000b │ 0x000c │
+ &quot;wgd_2&quot; =&gt; 1×7 DataFrame. Omitted printing of 2 columns
+│ Row │ family │ frequency │ clade  │ left   │ right  │
+│     │ Int64  │ Float64   │ UInt16 │ UInt16 │ UInt16 │
+├─────┼────────┼───────────┼────────┼────────┼────────┤
+│ 1   │ 2      │ 0.08      │ 0x0016 │ 0x0006 │ 0x0010 │</code></pre></div><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../wgd-dhmc/"><span class="direction">Previous</span><span class="title">Bayesian inference using NUTS with <code>DynamicHMC.jl</code></span></a><a class="next" href="../cytp450/"><span class="direction">Next</span><span class="title">Reconciled tree inference example</span></a></footer></article></body></html>
