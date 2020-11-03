@@ -51,7 +51,7 @@ node_id,wgd_id,distance,Δt,n,subtree
  CCD{UInt16,Float64}(Γ=59, 𝓛=13)
  CCD{UInt16,Float64}(Γ=95, 𝓛=13)
  CCD{UInt16,Float64}(Γ=67, 𝓛=13)
- CCD{UInt16,Float64}(Γ=65, 𝓛=13)</code></pre></div><p>Now we define the Turing model</p><pre><code class="language-">@model constantrates(model, ccd) = begin
+ CCD{UInt16,Float64}(Γ=65, 𝓛=13)</code></pre></div><p>Now we define the Turing model</p><div><pre><code class="language-julia">@model constantrates(model, ccd) = begin
     r  ~ MvLogNormal(ones(2))  # prior on the duplication and loss rate
     η  ~ Beta(3,1)  # hyperprior for the parameter of the geometric prior distribution on the number of genes at the root of the species tree
     q1 ~ Beta()  # prior for the WGD retention rate of `wgd_1`
@@ -60,7 +60,153 @@ node_id,wgd_id,distance,Δt,n,subtree
 end
 
 model = constantrates(w, ccd)
-chain = sample(model, NUTS(0.65), 100)</code></pre><div class="admonition warning"><div class="admonition-title">Warning</div><div class="admonition-text"><p>Of course such a chain should be run much longer than in this example! Here a very short chain is presented to ensure reasonable build times for this documentation.</p></div></div><h2><a class="nav-anchor" id="Using-a-branch-specific-rates-model-1" href="#Using-a-branch-specific-rates-model-1">Using a branch-specific rates model</a></h2><p>Now we will consider a model with branch-specific duplication and loss rates, using a more complicated hierarchical model with an bivariate uncorrelated relaxed clock prior. We&#39;ll use the same tree as above. The relevant model now is the DLWGD model:</p><div><pre><code class="language-julia">params = DLWGD(λ=randn(n), μ=randn(n), q=rand(2), η=rand())
+chain = sample(model, NUTS(0.65), 100)</code></pre><pre><code class="language-none">┌ Info: Found initial step size
+└   ϵ = 0.2
+Sampling   0%|                                          |  ETA: N/A
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling   1%|▍                                         |  ETA: 0:04:32
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling   2%|▉                                         |  ETA: 0:02:22
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling   3%|█▎                                        |  ETA: 0:01:34
+Sampling   4%|█▋                                        |  ETA: 0:01:13
+Sampling   5%|██▏                                       |  ETA: 0:00:59
+Sampling   6%|██▌                                       |  ETA: 0:00:53
+Sampling   7%|███                                       |  ETA: 0:00:46
+Sampling   8%|███▍                                      |  ETA: 0:00:41
+Sampling   9%|███▊                                      |  ETA: 0:00:37
+Sampling  10%|████▎                                     |  ETA: 0:00:34
+Sampling  11%|████▋                                     |  ETA: 0:00:31
+Sampling  12%|█████                                     |  ETA: 0:00:35
+Sampling  13%|█████▌                                    |  ETA: 0:00:36
+Sampling  14%|█████▉                                    |  ETA: 0:00:33
+Sampling  15%|██████▎                                   |  ETA: 0:00:32
+Sampling  16%|██████▊                                   |  ETA: 0:00:30
+Sampling  17%|███████▏                                  |  ETA: 0:00:28
+Sampling  18%|███████▌                                  |  ETA: 0:00:27
+Sampling  19%|████████                                  |  ETA: 0:00:27
+Sampling  20%|████████▍                                 |  ETA: 0:00:28
+Sampling  21%|████████▉                                 |  ETA: 0:00:27
+Sampling  22%|█████████▎                                |  ETA: 0:00:27
+Sampling  23%|█████████▋                                |  ETA: 0:00:26
+Sampling  24%|██████████▏                               |  ETA: 0:00:25
+Sampling  25%|██████████▌                               |  ETA: 0:00:24
+Sampling  26%|██████████▉                               |  ETA: 0:00:23
+Sampling  27%|███████████▍                              |  ETA: 0:00:24
+Sampling  28%|███████████▊                              |  ETA: 0:00:23
+Sampling  29%|████████████▏                             |  ETA: 0:00:22
+Sampling  30%|████████████▋                             |  ETA: 0:00:21
+Sampling  31%|█████████████                             |  ETA: 0:00:21
+Sampling  32%|█████████████▌                            |  ETA: 0:00:21
+Sampling  33%|█████████████▉                            |  ETA: 0:00:20
+Sampling  34%|██████████████▎                           |  ETA: 0:00:20
+Sampling  35%|██████████████▊                           |  ETA: 0:00:19
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  36%|███████████████▏                          |  ETA: 0:00:19
+Sampling  37%|███████████████▌                          |  ETA: 0:00:19
+Sampling  38%|████████████████                          |  ETA: 0:00:18
+Sampling  39%|████████████████▍                         |  ETA: 0:00:17
+Sampling  40%|████████████████▊                         |  ETA: 0:00:17
+Sampling  41%|█████████████████▎                        |  ETA: 0:00:17
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  42%|█████████████████▋                        |  ETA: 0:00:16
+Sampling  43%|██████████████████                        |  ETA: 0:00:16
+Sampling  44%|██████████████████▌                       |  ETA: 0:00:15
+Sampling  45%|██████████████████▉                       |  ETA: 0:00:15
+Sampling  46%|███████████████████▍                      |  ETA: 0:00:15
+Sampling  47%|███████████████████▊                      |  ETA: 0:00:14
+Sampling  48%|████████████████████▏                     |  ETA: 0:00:14
+Sampling  49%|████████████████████▋                     |  ETA: 0:00:14
+Sampling  50%|█████████████████████                     |  ETA: 0:00:13
+Sampling  51%|█████████████████████▍                    |  ETA: 0:00:13
+Sampling  52%|█████████████████████▉                    |  ETA: 0:00:12
+Sampling  53%|██████████████████████▎                   |  ETA: 0:00:12
+Sampling  54%|██████████████████████▋                   |  ETA: 0:00:12
+Sampling  55%|███████████████████████▏                  |  ETA: 0:00:11
+Sampling  56%|███████████████████████▌                  |  ETA: 0:00:11
+Sampling  57%|████████████████████████                  |  ETA: 0:00:10
+Sampling  58%|████████████████████████▍                 |  ETA: 0:00:10
+Sampling  59%|████████████████████████▊                 |  ETA: 0:00:10
+Sampling  60%|█████████████████████████▎                |  ETA: 0:00:10
+Sampling  61%|█████████████████████████▋                |  ETA: 0:00:09
+Sampling  62%|██████████████████████████                |  ETA: 0:00:09
+Sampling  63%|██████████████████████████▌               |  ETA: 0:00:09
+Sampling  64%|██████████████████████████▉               |  ETA: 0:00:09
+Sampling  65%|███████████████████████████▎              |  ETA: 0:00:08
+Sampling  66%|███████████████████████████▊              |  ETA: 0:00:08
+Sampling  67%|████████████████████████████▏             |  ETA: 0:00:08
+Sampling  68%|████████████████████████████▌             |  ETA: 0:00:08
+Sampling  69%|█████████████████████████████             |  ETA: 0:00:07
+Sampling  70%|█████████████████████████████▍            |  ETA: 0:00:07
+Sampling  71%|█████████████████████████████▉            |  ETA: 0:00:07
+Sampling  72%|██████████████████████████████▎           |  ETA: 0:00:07
+Sampling  73%|██████████████████████████████▋           |  ETA: 0:00:06
+Sampling  74%|███████████████████████████████▏          |  ETA: 0:00:06
+Sampling  75%|███████████████████████████████▌          |  ETA: 0:00:06
+Sampling  76%|███████████████████████████████▉          |  ETA: 0:00:06
+Sampling  77%|████████████████████████████████▍         |  ETA: 0:00:05
+Sampling  78%|████████████████████████████████▊         |  ETA: 0:00:05
+Sampling  79%|█████████████████████████████████▏        |  ETA: 0:00:05
+Sampling  80%|█████████████████████████████████▋        |  ETA: 0:00:05
+Sampling  81%|██████████████████████████████████        |  ETA: 0:00:04
+Sampling  82%|██████████████████████████████████▌       |  ETA: 0:00:04
+Sampling  83%|██████████████████████████████████▉       |  ETA: 0:00:04
+Sampling  84%|███████████████████████████████████▎      |  ETA: 0:00:04
+Sampling  85%|███████████████████████████████████▊      |  ETA: 0:00:03
+Sampling  86%|████████████████████████████████████▏     |  ETA: 0:00:03
+Sampling  87%|████████████████████████████████████▌     |  ETA: 0:00:03
+Sampling  88%|█████████████████████████████████████     |  ETA: 0:00:03
+Sampling  89%|█████████████████████████████████████▍    |  ETA: 0:00:03
+Sampling  90%|█████████████████████████████████████▊    |  ETA: 0:00:02
+Sampling  91%|██████████████████████████████████████▎   |  ETA: 0:00:02
+Sampling  92%|██████████████████████████████████████▋   |  ETA: 0:00:02
+Sampling  93%|███████████████████████████████████████   |  ETA: 0:00:02
+Sampling  94%|███████████████████████████████████████▌  |  ETA: 0:00:01
+Sampling  95%|███████████████████████████████████████▉  |  ETA: 0:00:01
+Sampling  96%|████████████████████████████████████████▍ |  ETA: 0:00:01
+Sampling  97%|████████████████████████████████████████▊ |  ETA: 0:00:01
+Sampling  98%|█████████████████████████████████████████▏|  ETA: 0:00:00
+Sampling  99%|█████████████████████████████████████████▋|  ETA: 0:00:00
+Sampling 100%|██████████████████████████████████████████| Time: 0:00:22
+Sampling 100%|██████████████████████████████████████████| Time: 0:00:22
+Chains MCMC chain (50×17×1 Array{Float64,3}):
+
+Iterations        = 1:50
+Thinning interval = 1
+Chains            = 1
+Samples per chain = 50
+parameters        = q1, q2, r[1], r[2], η
+internals         = acceptance_rate, hamiltonian_energy, hamiltonian_energy_error, is_accept, log_density, lp, max_hamiltonian_energy_error, n_steps, nom_step_size, numerical_error, step_size, tree_depth
+
+Summary Statistics
+  parameters      mean       std   naive_se      mcse       ess      rhat
+      Symbol   Float64   Float64    Float64   Missing   Float64   Float64
+
+          q1    0.3480    0.1669     0.0236   missing   29.2424    1.0065
+          q2    0.0567    0.0596     0.0084   missing   12.1101    1.0835
+        r[1]    0.1323    0.0173     0.0024   missing   84.2762    1.0040
+        r[2]    0.1674    0.0284     0.0040   missing   16.7638    1.0503
+           η    0.8027    0.1149     0.0162   missing   29.6263    1.0049
+
+Quantiles
+  parameters      2.5%     25.0%     50.0%     75.0%     97.5%
+      Symbol   Float64   Float64   Float64   Float64   Float64
+
+          q1    0.1041    0.2032    0.3392    0.4427    0.6863
+          q2    0.0071    0.0217    0.0385    0.0759    0.1989
+        r[1]    0.0979    0.1189    0.1348    0.1436    0.1634
+        r[2]    0.1111    0.1466    0.1700    0.1895    0.2112
+           η    0.5766    0.7305    0.8406    0.8956    0.9511</code></pre></div><div class="admonition warning"><div class="admonition-title">Warning</div><div class="admonition-text"><p>Of course such a chain should be run much longer than in this example! Here a very short chain is presented to ensure reasonable build times for this documentation.</p></div></div><h2><a class="nav-anchor" id="Using-a-branch-specific-rates-model-1" href="#Using-a-branch-specific-rates-model-1">Using a branch-specific rates model</a></h2><p>Now we will consider a model with branch-specific duplication and loss rates, using a more complicated hierarchical model with an bivariate uncorrelated relaxed clock prior. We&#39;ll use the same tree as above. The relevant model now is the DLWGD model:</p><div><pre><code class="language-julia">params = DLWGD(λ=randn(n), μ=randn(n), q=rand(2), η=rand())
 r = Whale.RatesModel(params, fixed=(:p,))
 w = WhaleModel(r, t, 0.5)
 ccd = read_ale(joinpath(@__DIR__, &quot;../../example/example-1/ale&quot;), w)</code></pre><pre><code class="language-none">12-element Array{CCD{UInt16,Float64},1}:
@@ -75,7 +221,7 @@ ccd = read_ale(joinpath(@__DIR__, &quot;../../example/example-1/ale&quot;), w)</
  CCD{UInt16,Float64}(Γ=59, 𝓛=13)
  CCD{UInt16,Float64}(Γ=95, 𝓛=13)
  CCD{UInt16,Float64}(Γ=67, 𝓛=13)
- CCD{UInt16,Float64}(Γ=65, 𝓛=13)</code></pre></div><p>Note that the duplication and loss rates should here be specified on a log-scale for the DLWGD model. We use an LKJ prior for the covariance matrix, specifying a prior for the correlation of duplication and loss rates (<code>ρ</code>) and a prior for the scale parameter <code>τ</code> (see e.g. the <a href="https://mc-stan.org/docs/2_23/stan-users-guide/multivariate-hierarchical-priors-section.html">stan docs</a>):</p><pre><code class="language-">@model branchrates(model, ccd, ::Type{T}=Matrix{Float64}) where {T} = begin
+ CCD{UInt16,Float64}(Γ=65, 𝓛=13)</code></pre></div><p>Note that the duplication and loss rates should here be specified on a log-scale for the DLWGD model. We use an LKJ prior for the covariance matrix, specifying a prior for the correlation of duplication and loss rates (<code>ρ</code>) and a prior for the scale parameter <code>τ</code> (see e.g. the <a href="https://mc-stan.org/docs/2_23/stan-users-guide/multivariate-hierarchical-priors-section.html">stan docs</a>):</p><div><pre><code class="language-julia">@model branchrates(model, ccd, ::Type{T}=Matrix{Float64}) where {T} = begin
     η ~ Beta(3,1)
     ρ ~ Uniform(-1, 1.)
     τ ~ truncated(Cauchy(0, 1), 0, Inf)
@@ -94,7 +240,461 @@ ccd = read_ale(joinpath(@__DIR__, &quot;../../example/example-1/ale&quot;), w)</
 end
 
 model = branchrates(w, ccd)
-chain = sample(model, NUTS(0.65), 100)</code></pre><div class="admonition warning"><div class="admonition-title">Warning</div><div class="admonition-text"><p>Of course such a chain should be run much longer than in this example! Here a very short chain is presented to ensure reasonable build times for this documentation.</p></div></div><p>Now let&#39;s obtain reconciled trees</p><pre><code class="language-">pdf = DataFrame(chain)
+chain = sample(model, NUTS(0.65), 100)</code></pre><pre><code class="language-none">┌ Info: Found initial step size
+└   ϵ = 0.4
+Sampling   0%|                                          |  ETA: N/A
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling   1%|▍                                         |  ETA: 0:01:14
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling   2%|▉                                         |  ETA: 0:00:46
+Sampling   3%|█▎                                        |  ETA: 0:00:31
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling   4%|█▋                                        |  ETA: 0:00:24
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling   5%|██▏                                       |  ETA: 0:00:20
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling   6%|██▌                                       |  ETA: 0:00:18
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling   7%|███                                       |  ETA: 0:00:16
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling   8%|███▍                                      |  ETA: 0:00:14
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling   9%|███▊                                      |  ETA: 0:00:15
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  10%|████▎                                     |  ETA: 0:00:14
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  11%|████▋                                     |  ETA: 0:00:13
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  12%|█████                                     |  ETA: 0:00:13
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  13%|█████▌                                    |  ETA: 0:00:12
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  14%|█████▉                                    |  ETA: 0:00:11
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  15%|██████▎                                   |  ETA: 0:00:11
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  16%|██████▊                                   |  ETA: 0:00:10
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  17%|███████▏                                  |  ETA: 0:00:10
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  18%|███████▌                                  |  ETA: 0:00:12
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  19%|████████                                  |  ETA: 0:00:11
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  20%|████████▍                                 |  ETA: 0:00:11
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  21%|████████▉                                 |  ETA: 0:00:10
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  22%|█████████▎                                |  ETA: 0:00:10
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  23%|█████████▋                                |  ETA: 0:00:10
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  24%|██████████▏                               |  ETA: 0:00:09
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  25%|██████████▌                               |  ETA: 0:00:09
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  26%|██████████▉                               |  ETA: 0:00:09
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  27%|███████████▍                              |  ETA: 0:00:08
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  28%|███████████▊                              |  ETA: 0:00:09
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  29%|████████████▏                             |  ETA: 0:00:13
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  30%|████████████▋                             |  ETA: 0:00:13
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  31%|█████████████                             |  ETA: 0:00:13
+Sampling  32%|█████████████▌                            |  ETA: 0:00:55
+Sampling  33%|█████████████▉                            |  ETA: 0:01:32
+Sampling  34%|██████████████▎                           |  ETA: 0:02:06
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  35%|██████████████▊                           |  ETA: 0:02:19
+Sampling  36%|███████████████▏                          |  ETA: 0:02:48
+Sampling  37%|███████████████▌                          |  ETA: 0:03:14
+Sampling  38%|████████████████                          |  ETA: 0:03:37
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  39%|████████████████▍                         |  ETA: 0:03:32
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  40%|████████████████▊                         |  ETA: 0:03:33
+Sampling  41%|█████████████████▎                        |  ETA: 0:03:52
+Sampling  42%|█████████████████▋                        |  ETA: 0:04:08
+Sampling  43%|██████████████████                        |  ETA: 0:04:23
+Sampling  44%|██████████████████▌                       |  ETA: 0:04:36
+Sampling  45%|██████████████████▉                       |  ETA: 0:04:47
+Sampling  46%|███████████████████▍                      |  ETA: 0:04:57
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  47%|███████████████████▊                      |  ETA: 0:04:53
+Sampling  48%|████████████████████▏                     |  ETA: 0:05:01
+Sampling  49%|████████████████████▋                     |  ETA: 0:05:08
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  50%|█████████████████████                     |  ETA: 0:04:56
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  51%|█████████████████████▍                    |  ETA: 0:04:45
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  52%|█████████████████████▉                    |  ETA: 0:04:34
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  53%|██████████████████████▎                   |  ETA: 0:04:23
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  54%|██████████████████████▋                   |  ETA: 0:04:13
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  55%|███████████████████████▏                  |  ETA: 0:04:03
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  56%|███████████████████████▌                  |  ETA: 0:03:53
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  57%|████████████████████████                  |  ETA: 0:03:47
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  58%|████████████████████████▍                 |  ETA: 0:03:38
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  59%|████████████████████████▊                 |  ETA: 0:03:29
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  60%|█████████████████████████▎                |  ETA: 0:03:21
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  61%|█████████████████████████▋                |  ETA: 0:03:13
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  62%|██████████████████████████                |  ETA: 0:03:13
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  63%|██████████████████████████▌               |  ETA: 0:03:15
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  64%|██████████████████████████▉               |  ETA: 0:03:07
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  65%|███████████████████████████▎              |  ETA: 0:02:59
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  66%|███████████████████████████▊              |  ETA: 0:02:51
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  67%|████████████████████████████▏             |  ETA: 0:02:44
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  68%|████████████████████████████▌             |  ETA: 0:02:37
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  69%|█████████████████████████████             |  ETA: 0:02:30
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  70%|█████████████████████████████▍            |  ETA: 0:02:23
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  71%|█████████████████████████████▉            |  ETA: 0:02:16
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  72%|██████████████████████████████▎           |  ETA: 0:02:10
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  73%|██████████████████████████████▋           |  ETA: 0:02:03
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  74%|███████████████████████████████▏          |  ETA: 0:01:57
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  75%|███████████████████████████████▌          |  ETA: 0:01:51
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  76%|███████████████████████████████▉          |  ETA: 0:01:46
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  77%|████████████████████████████████▍         |  ETA: 0:01:40
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  78%|████████████████████████████████▊         |  ETA: 0:01:35
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  79%|█████████████████████████████████▏        |  ETA: 0:01:29
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  80%|█████████████████████████████████▋        |  ETA: 0:01:25
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  81%|██████████████████████████████████        |  ETA: 0:01:20
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  82%|██████████████████████████████████▌       |  ETA: 0:01:15
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  83%|██████████████████████████████████▉       |  ETA: 0:01:10
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  84%|███████████████████████████████████▎      |  ETA: 0:01:05
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  85%|███████████████████████████████████▊      |  ETA: 0:01:01
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  86%|████████████████████████████████████▏     |  ETA: 0:00:56
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  87%|████████████████████████████████████▌     |  ETA: 0:00:52
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  88%|█████████████████████████████████████     |  ETA: 0:00:48
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  89%|█████████████████████████████████████▍    |  ETA: 0:00:43
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  90%|█████████████████████████████████████▊    |  ETA: 0:00:39
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  91%|██████████████████████████████████████▎   |  ETA: 0:00:35
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  92%|██████████████████████████████████████▋   |  ETA: 0:00:31
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  93%|███████████████████████████████████████   |  ETA: 0:00:27
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  94%|███████████████████████████████████████▌  |  ETA: 0:00:23
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  95%|███████████████████████████████████████▉  |  ETA: 0:00:19
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  96%|████████████████████████████████████████▍ |  ETA: 0:00:15
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  97%|████████████████████████████████████████▊ |  ETA: 0:00:11
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  98%|█████████████████████████████████████████▏|  ETA: 0:00:07
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling  99%|█████████████████████████████████████████▋|  ETA: 0:00:04
+┌ Warning: The current proposal will be rejected due to numerical error(s).
+│   isfinite.((θ, r, ℓπ, ℓκ)) = (true, true, false, true)
+└ @ AdvancedHMC ~/.julia/packages/AdvancedHMC/QB368/src/hamiltonian.jl:47
+Sampling 100%|██████████████████████████████████████████| Time: 0:06:05
+Sampling 100%|██████████████████████████████████████████| Time: 0:06:05
+Chains MCMC chain (50×51×1 Array{Float64,3}):
+
+Iterations        = 1:50
+Thinning interval = 1
+Chains            = 1
+Samples per chain = 50
+parameters        = q1, q2, r[Colon(),1][1], r[Colon(),1][2], r[Colon(),2][1], r[Colon(),2][2], r[Colon(),3][1], r[Colon(),3][2], r[Colon(),4][1], r[Colon(),4][2], r[Colon(),5][1], r[Colon(),5][2], r[Colon(),6][1], r[Colon(),6][2], r[Colon(),7][1], r[Colon(),7][2], r[Colon(),8][1], r[Colon(),8][2], r[Colon(),9][1], r[Colon(),9][2], r[Colon(),10][1], r[Colon(),10][2], r[Colon(),11][1], r[Colon(),11][2], r[Colon(),12][1], r[Colon(),12][2], r[Colon(),13][1], r[Colon(),13][2], r[Colon(),14][1], r[Colon(),14][2], r[Colon(),15][1], r[Colon(),15][2], r[Colon(),16][1], r[Colon(),16][2], r[Colon(),17][1], r[Colon(),17][2], η, ρ, τ
+internals         = acceptance_rate, hamiltonian_energy, hamiltonian_energy_error, is_accept, log_density, lp, max_hamiltonian_energy_error, n_steps, nom_step_size, numerical_error, step_size, tree_depth
+
+Summary Statistics
+        parameters      mean       std   naive_se      mcse       ess      rhat
+            Symbol   Float64   Float64    Float64   Missing   Float64   Float64
+
+                q1    0.1711    0.0000     0.0000   missing    9.6083    1.0694
+                q2    0.5726    0.0000     0.0000   missing    1.5395    1.8384
+   r[Colon(),1][1]    0.0387    0.0000     0.0000   missing    4.4255    1.1703
+   r[Colon(),1][2]    1.6704    0.0000     0.0000   missing    1.7061    1.6658
+   r[Colon(),2][1]   -0.1403    0.0000     0.0000   missing    4.5746    1.1475
+   r[Colon(),2][2]    1.7010    0.0000     0.0000   missing    3.6915    1.2131
+   r[Colon(),3][1]   -0.1263    0.0000     0.0000   missing    2.0313    1.5036
+   r[Colon(),3][2]    1.4755    0.0000     0.0000   missing    2.5784    1.3485
+   r[Colon(),4][1]   -0.3001    0.0000     0.0000   missing    1.7992    1.5832
+   r[Colon(),4][2]    1.6085    0.0000     0.0000   missing    2.8313    1.3102
+   r[Colon(),5][1]    0.1265    0.0000     0.0000   missing    1.7241    1.6569
+   r[Colon(),5][2]    1.5548    0.0000     0.0000   missing    2.9221    1.2926
+   r[Colon(),6][1]    0.1553    0.0000     0.0000   missing    4.6225    1.1571
+   r[Colon(),6][2]    1.5446    0.0000     0.0000   missing    1.8938    1.5230
+   r[Colon(),7][1]    0.1589    0.0000     0.0000   missing    2.0827    1.4722
+   r[Colon(),7][2]    1.4091    0.0000     0.0000   missing    2.9475    1.2907
+   r[Colon(),8][1]    0.2926    0.0000     0.0000   missing    1.7913    1.5860
+   r[Colon(),8][2]    1.8035    0.0000     0.0000   missing    7.4097    1.0202
+   r[Colon(),9][1]   -0.0263    0.0000     0.0000   missing    3.4965    1.2394
+   r[Colon(),9][2]    1.6926    0.0000     0.0000   missing    2.9199    1.2954
+  r[Colon(),10][1]   -0.1243    0.0000     0.0000   missing    2.1775    1.4356
+  r[Colon(),10][2]    1.6587    0.0000     0.0000   missing    2.4103    1.3848
+  r[Colon(),11][1]   -0.1516    0.0000     0.0000   missing    2.8452    1.2986
+  r[Colon(),11][2]    1.5401    0.0000     0.0000   missing    2.2635    1.4249
+  r[Colon(),12][1]    0.1490    0.0000     0.0000   missing    2.0147    1.5024
+  r[Colon(),12][2]    1.7779    0.0000     0.0000   missing    1.7520    1.6600
+  r[Colon(),13][1]    0.0916    0.0000     0.0000   missing    1.6903    1.6569
+  r[Colon(),13][2]    1.3478    0.0000     0.0000   missing    3.6246    1.2532
+  r[Colon(),14][1]   -0.2201    0.0000     0.0000   missing    1.9269    1.5424
+  r[Colon(),14][2]    1.5790    0.0000     0.0000   missing    5.1608    1.1115
+  r[Colon(),15][1]   -0.3608    0.0000     0.0000   missing    2.1748    1.4449
+  r[Colon(),15][2]    1.3682    0.0000     0.0000   missing    1.5458    1.8258
+  r[Colon(),16][1]    0.2964    0.0000     0.0000   missing    2.6939    1.3769
+  r[Colon(),16][2]    1.9682    0.0000     0.0000   missing    2.7700    1.3090
+  r[Colon(),17][1]    0.3775    0.0000     0.0000   missing    1.5251    1.8518
+  r[Colon(),17][2]    1.9153    0.0000     0.0000   missing    1.7320    1.6201
+                 η    0.2159    0.0000     0.0000   missing    2.3345    0.9798
+                 ρ    0.7013    0.0000     0.0000   missing    4.4625    1.1867
+                 τ    0.2525    0.0000     0.0000   missing    2.7382    1.3279
+
+Quantiles
+        parameters      2.5%     25.0%     50.0%     75.0%     97.5%
+            Symbol   Float64   Float64   Float64   Float64   Float64
+
+                q1    0.1711    0.1711    0.1711    0.1711    0.1711
+                q2    0.5726    0.5726    0.5726    0.5726    0.5726
+   r[Colon(),1][1]    0.0387    0.0387    0.0387    0.0387    0.0387
+   r[Colon(),1][2]    1.6704    1.6704    1.6704    1.6704    1.6704
+   r[Colon(),2][1]   -0.1403   -0.1403   -0.1403   -0.1403   -0.1403
+   r[Colon(),2][2]    1.7010    1.7010    1.7010    1.7010    1.7010
+   r[Colon(),3][1]   -0.1263   -0.1263   -0.1263   -0.1263   -0.1263
+   r[Colon(),3][2]    1.4755    1.4755    1.4755    1.4755    1.4755
+   r[Colon(),4][1]   -0.3001   -0.3001   -0.3001   -0.3001   -0.3001
+   r[Colon(),4][2]    1.6085    1.6085    1.6085    1.6085    1.6085
+   r[Colon(),5][1]    0.1265    0.1265    0.1265    0.1265    0.1265
+   r[Colon(),5][2]    1.5548    1.5548    1.5548    1.5548    1.5548
+   r[Colon(),6][1]    0.1553    0.1553    0.1553    0.1553    0.1553
+   r[Colon(),6][2]    1.5446    1.5446    1.5446    1.5446    1.5446
+   r[Colon(),7][1]    0.1589    0.1589    0.1589    0.1589    0.1589
+   r[Colon(),7][2]    1.4091    1.4091    1.4091    1.4091    1.4091
+   r[Colon(),8][1]    0.2926    0.2926    0.2926    0.2926    0.2926
+   r[Colon(),8][2]    1.8035    1.8035    1.8035    1.8035    1.8035
+   r[Colon(),9][1]   -0.0263   -0.0263   -0.0263   -0.0263   -0.0263
+   r[Colon(),9][2]    1.6926    1.6926    1.6926    1.6926    1.6926
+  r[Colon(),10][1]   -0.1243   -0.1243   -0.1243   -0.1243   -0.1243
+  r[Colon(),10][2]    1.6587    1.6587    1.6587    1.6587    1.6587
+  r[Colon(),11][1]   -0.1516   -0.1516   -0.1516   -0.1516   -0.1516
+  r[Colon(),11][2]    1.5401    1.5401    1.5401    1.5401    1.5401
+  r[Colon(),12][1]    0.1490    0.1490    0.1490    0.1490    0.1490
+  r[Colon(),12][2]    1.7779    1.7779    1.7779    1.7779    1.7779
+  r[Colon(),13][1]    0.0916    0.0916    0.0916    0.0916    0.0916
+  r[Colon(),13][2]    1.3478    1.3478    1.3478    1.3478    1.3478
+  r[Colon(),14][1]   -0.2201   -0.2201   -0.2201   -0.2201   -0.2201
+  r[Colon(),14][2]    1.5790    1.5790    1.5790    1.5790    1.5790
+  r[Colon(),15][1]   -0.3608   -0.3608   -0.3608   -0.3608   -0.3608
+  r[Colon(),15][2]    1.3682    1.3682    1.3682    1.3682    1.3682
+  r[Colon(),16][1]    0.2964    0.2964    0.2964    0.2964    0.2964
+  r[Colon(),16][2]    1.9682    1.9682    1.9682    1.9682    1.9682
+  r[Colon(),17][1]    0.3775    0.3775    0.3775    0.3775    0.3775
+  r[Colon(),17][2]    1.9153    1.9153    1.9153    1.9153    1.9153
+                 η    0.2159    0.2159    0.2159    0.2159    0.2159
+                 ρ    0.7013    0.7013    0.7013    0.7013    0.7013
+                 τ    0.2525    0.2525    0.2525    0.2525    0.2525</code></pre></div><div class="admonition warning"><div class="admonition-title">Warning</div><div class="admonition-text"><p>Of course such a chain should be run much longer than in this example! Here a very short chain is presented to ensure reasonable build times for this documentation.</p></div></div><p>Now let&#39;s obtain reconciled trees</p><pre><code class="language-">pdf = DataFrame(chain)
 fun = (m, x)-&gt; Array(x) |&gt; x-&gt;m((λ=x[3:2:36], μ=x[4:2:36], η=x[end-2], q=x[1:2]))
 tt = TreeTracker(w, ccd[end-1:end], pdf, fun)
 trees = track(tt)</code></pre><p>Let&#39;s have a look at the first family</p><pre><code class="language-">trees[1].trees</code></pre><p>Or maybe all the gene pairs</p><pre><code class="language-">ps = Whale.getpairs(trees, w);
