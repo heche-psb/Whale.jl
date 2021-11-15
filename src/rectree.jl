@@ -15,7 +15,7 @@ writetrees(s::String, rsum::Vector{NamedTuple}) = open(s, "w") do io
 end
 function writetrees(io::IO, rsum::Vector{NamedTuple}, sep="\n")
     for (f,t) in rsum
-        write(io, "# pp $f$sep$(nwstr(t))\n")
+        write(io, "# pp $f$sep$(nwstr(t, internal=true))\n")
     end
 end
 
