@@ -31,6 +31,19 @@ function summarize(xs::AbstractVector{RecSummary}) # no joke
     (full=events, sum=sm)
 end
 
+function recstr(n::RecNode)
+    function walk(n)                                                                                      
+        isleaf(n) && return "$(name(n))"
+        s = join([walk(c) for c in children(n)], ",")
+        label = n.data.label   
+        cred  = n.data.cred    
+        internal = "$(label)_$(cred)"   
+        return "($s)$internal" 
+    end
+    s = walk(n)                
+    s*";"
+end 
+
 function getpairs(rsum::AbstractVector{RecSummary}, model)
     labels = String[]
     for n in model.order
